@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="settings_icon">Icon used for settings drawer item</string>
+    <string name="home_icon">Icon used for home drawer item</string>
 </resources>
