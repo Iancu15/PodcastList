@@ -1,10 +1,10 @@
-package com.example.myapplication
+package com.podcastlist
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -24,9 +24,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myapplication.ui.screen.HomeScreen
-import com.example.myapplication.ui.screen.SettingsScreen
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.podcastlist.ui.screen.HomeScreen
+import com.podcastlist.ui.screen.SettingsScreen
+import com.podcastlist.ui.theme.MyApplicationTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -42,17 +42,25 @@ data class DrawerItemData(
     val screen: Screen
 )
 
+val screenToTitleDict = mapOf(
+    Screen.HOME to "Home",
+    Screen.SETTINGS to "Settings"
+)
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyApplicationTheme {
-                // A surface container using the 'background' color from the theme
+            val isSystemInDarkThemeValue = isSystemInDarkTheme()
+            var isAppInDarkTheme by remember { mutableStateOf(isSystemInDarkThemeValue) }
+            MyApplicationTheme(darkTheme = isAppInDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ScaffoldDeclaration()
+                    ScaffoldDeclaration(isAppInDarkTheme) {
+                        newValue -> isAppInDarkTheme = newValue
+                    }
                 }
             }
         }
@@ -60,15 +68,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ScaffoldDeclaration() {
+fun ScaffoldDeclaration(
+    isAppInDarkTheme: Boolean,
+    setColorTheme: (Boolean) -> Unit
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
+    var currentScreen by remember { mutableStateOf(Screen.HOME) }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("PodcastList")
+                    Text(screenToTitleDict.getOrDefault(currentScreen, "PodcastList"))
                 },
                 navigationIcon = {
                     IconButton(
@@ -88,13 +100,25 @@ fun ScaffoldDeclaration() {
             )
         },
     ) {
-        NavHostDeclaration(navController)
-        Drawer(paddingValues = it, drawerState, navController, scope)
+        NavHostDeclaration(navController, isAppInDarkTheme, setColorTheme)
+        Drawer(
+            paddingValues = it,
+            drawerState,
+            navController,
+            scope,
+            currentScreen,
+        ) {
+                newScreen -> currentScreen = newScreen
+        }
     }
 }
 
 @Composable
-fun NavHostDeclaration(navController: NavHostController) {
+fun NavHostDeclaration(
+    navController: NavHostController,
+    isAppInDarkTheme: Boolean,
+    setColorTheme: (Boolean) -> Unit
+) {
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -104,7 +128,7 @@ fun NavHostDeclaration(navController: NavHostController) {
         }
 
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(isAppInDarkTheme, setColorTheme)
         }
     }
 }
@@ -114,9 +138,10 @@ fun Drawer(
     paddingValues: PaddingValues,
     drawerState: DrawerState,
     navController: NavHostController,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    currentScreen: Screen,
+    modifyScreen: (Screen) -> Unit
 ) {
-    var currentScreen by remember { mutableStateOf(Screen.HOME) }
     ModalDrawer(
         modifier = Modifier.padding(paddingValues),
         drawerState = drawerState,
@@ -136,7 +161,7 @@ fun Drawer(
                     )
                 ) {
                     navController.navigate("home")
-                    currentScreen = Screen.HOME
+                    modifyScreen(Screen.HOME)
                 }
 
                 DrawerItem(
@@ -151,7 +176,7 @@ fun Drawer(
                     )
                 ) {
                     navController.navigate("settings")
-                    currentScreen = Screen.SETTINGS
+                    modifyScreen(Screen.SETTINGS)
                 }
             }
         }

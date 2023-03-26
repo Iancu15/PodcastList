@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.podcastlist
 
 import org.junit.Test
 

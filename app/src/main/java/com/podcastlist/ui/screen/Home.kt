@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen
+package com.podcastlist.ui.screen
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
