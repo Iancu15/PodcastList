@@ -49,11 +49,8 @@ val screenToTitleDict = mapOf(
 )
 class MainActivity : ComponentActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    //var isUserSignedIn by remember { mutableStateOf(false) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        auth = FirebaseAuth.getInstance()
         setContent {
             val isSystemInDarkThemeValue = isSystemInDarkTheme()
             var isAppInDarkTheme by remember { mutableStateOf(isSystemInDarkThemeValue) }
@@ -70,12 +67,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    public override fun onStart() {
-        super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = auth.currentUser
-        if(currentUser != null){ }
-    }
 }
 
 @Composable
@@ -109,17 +100,18 @@ fun ScaffoldDeclaration(
                     }
                 }
             )
-        },
+        }
     ) {
-        NavHostDeclaration(navController, isAppInDarkTheme, setColorTheme)
         Drawer(
             paddingValues = it,
             drawerState,
             navController,
             scope,
             currentScreen,
-        ) {
-                newScreen -> currentScreen = newScreen
+            isAppInDarkTheme,
+            setColorTheme
+        ) { newScreen ->
+            currentScreen = newScreen
         }
     }
 }
@@ -151,6 +143,8 @@ fun Drawer(
     navController: NavHostController,
     scope: CoroutineScope,
     currentScreen: Screen,
+    isAppInDarkTheme: Boolean,
+    setColorTheme: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit
 ) {
     ModalDrawer(
@@ -192,7 +186,7 @@ fun Drawer(
             }
         }
     ) {
-
+        NavHostDeclaration(navController, isAppInDarkTheme, setColorTheme)
     }
 }
 
