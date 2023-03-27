@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "818530773694",
+    "project_id": "podcastlistauth",
+    "storage_bucket": "podcastlistauth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818530773694:android:a7709b0989113d3eec8cef",
+        "android_client_info": {
+          "package_name": "com.podcastlist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "818530773694-82p3g4g0njg21bhkapjfr82h2q1idufg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf-9VQ4p-YoW2rRt_W3S4G9ktDvx2v7os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "818530773694-82p3g4g0njg21bhkapjfr82h2q1idufg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

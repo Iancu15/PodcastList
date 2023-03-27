@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.podcastlist.ui.screen.HomeScreen
 import com.podcastlist.ui.screen.SettingsScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
@@ -46,10 +47,13 @@ val screenToTitleDict = mapOf(
     Screen.HOME to "Home",
     Screen.SETTINGS to "Settings"
 )
-
 class MainActivity : ComponentActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    //var isUserSignedIn by remember { mutableStateOf(false) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = FirebaseAuth.getInstance()
         setContent {
             val isSystemInDarkThemeValue = isSystemInDarkTheme()
             var isAppInDarkTheme by remember { mutableStateOf(isSystemInDarkThemeValue) }
@@ -64,6 +68,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    public override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = auth.currentUser
+        if(currentUser != null){ }
     }
 }
 
