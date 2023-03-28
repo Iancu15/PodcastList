@@ -1,15 +1,14 @@
 package com.podcastlist.ui.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.podcastlist.R
 
 @Composable
 fun SettingsScreen(
@@ -22,7 +21,7 @@ fun SettingsScreen(
             .fillMaxWidth()
     ) {
         Text(
-            text = "Dark theme",
+            text = stringResource(R.string.dark_theme_setting_text),
             fontSize = 30.sp,
             style = MaterialTheme.typography.h4
         )

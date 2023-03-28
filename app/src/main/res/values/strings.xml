@@ -2,4 +2,19 @@
     <string name="app_name">My Application</string>
     <string name="settings_icon">Icon used for settings drawer item</string>
     <string name="home_icon">Icon used for home drawer item</string>
+    <string name="home_title">Home</string>
+    <string name="app_title">PodcastList</string>
+    <string name="home_path">home</string>
+    <string name="login_path">login</string>
+    <string name="settings_path">settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="dark_theme_setting_text">Dark theme</string>
+    <string name="login_title">Login</string>
+    <string name="email_label">Email</string>
+    <string name="email_icon">Icon used for email text field</string>
+    <string name="email_placeholder">email</string>
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">password</string>
+    <string name="password_icon">Icon used for password text field</string>
+    <string name="visibility_icon">Icon used to toggle password visibility</string>
 </resources>

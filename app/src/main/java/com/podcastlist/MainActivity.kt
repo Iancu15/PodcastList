@@ -24,15 +24,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuth
+import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.screen.HomeScreen
+import com.podcastlist.ui.screen.LoginDrawerItem
 import com.podcastlist.ui.screen.SettingsScreen
+import com.podcastlist.ui.screen.LoginScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 enum class Screen {
-    HOME, SETTINGS
+    HOME, SETTINGS, LOGIN
 }
 
 @Immutable
@@ -47,8 +50,9 @@ val screenToTitleDict = mapOf(
     Screen.HOME to "Home",
     Screen.SETTINGS to "Settings"
 )
-class MainActivity : ComponentActivity() {
 
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -78,11 +82,14 @@ fun ScaffoldDeclaration(
     val scope = rememberCoroutineScope()
     val navController = rememberNavController()
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
+    val scaffoldState = rememberScaffoldState()
+    val SnackbarManager = SnackbarManager(scaffoldState, scope)
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(screenToTitleDict.getOrDefault(currentScreen, "PodcastList"))
+                    Text(screenToTitleDict.getOrDefault(currentScreen, stringResource(R.string.app_title)))
                 },
                 navigationIcon = {
                     IconButton(
@@ -107,6 +114,7 @@ fun ScaffoldDeclaration(
             drawerState,
             navController,
             scope,
+            SnackbarManager,
             currentScreen,
             isAppInDarkTheme,
             setColorTheme
@@ -119,18 +127,26 @@ fun ScaffoldDeclaration(
 @Composable
 fun NavHostDeclaration(
     navController: NavHostController,
+    snackbarManager: SnackbarManager,
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit
 ) {
+    val loginPath = stringResource(R.string.login_path)
+    val homePath = stringResource(R.string.home_path)
+    val settingsPath = stringResource(R.string.settings_path)
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = homePath
     ) {
-        composable("home") {
+        composable(loginPath) {
+            LoginScreen(snackbarManager = snackbarManager)
+        }
+
+        composable(homePath) {
             HomeScreen()
         }
 
-        composable("settings") {
+        composable(settingsPath) {
             SettingsScreen(isAppInDarkTheme, setColorTheme)
         }
     }
@@ -142,11 +158,15 @@ fun Drawer(
     drawerState: DrawerState,
     navController: NavHostController,
     scope: CoroutineScope,
+    snackbarManager: SnackbarManager,
     currentScreen: Screen,
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit
 ) {
+    val loginPath = stringResource(R.string.login_path)
+    val homePath = stringResource(R.string.home_path)
+    val settingsPath = stringResource(R.string.settings_path)
     ModalDrawer(
         modifier = Modifier.padding(paddingValues),
         drawerState = drawerState,
@@ -154,18 +174,27 @@ fun Drawer(
             Column(
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 10.dp, end = 10.dp)
             ) {
+                LoginDrawerItem(
+                    drawerState = drawerState,
+                    scope = scope,
+                    currentScreen = currentScreen
+                ) {
+                    navController.navigate(loginPath)
+                    modifyScreen(Screen.LOGIN)
+                }
+
                 DrawerItem(
                     drawerState = drawerState,
                     scope = scope,
                     currentScreen = currentScreen,
                     drawerItemData = DrawerItemData(
-                        buttonText = "Home",
+                        buttonText = stringResource(R.string.home_title),
                         iconImageVector = Icons.Default.Home,
                         iconDescriptionId = R.string.home_icon,
                         screen = Screen.HOME
                     )
                 ) {
-                    navController.navigate("home")
+                    navController.navigate(homePath)
                     modifyScreen(Screen.HOME)
                 }
 
@@ -174,19 +203,19 @@ fun Drawer(
                     scope = scope,
                     currentScreen = currentScreen,
                     drawerItemData = DrawerItemData(
-                        buttonText = "Settings",
+                        buttonText = stringResource(R.string.settings_title),
                         iconImageVector = Icons.Default.Settings,
                         iconDescriptionId = R.string.settings_icon,
                         screen = Screen.SETTINGS
                     )
                 ) {
-                    navController.navigate("settings")
+                    navController.navigate(settingsPath)
                     modifyScreen(Screen.SETTINGS)
                 }
             }
         }
     ) {
-        NavHostDeclaration(navController, isAppInDarkTheme, setColorTheme)
+        NavHostDeclaration(navController, snackbarManager, isAppInDarkTheme, setColorTheme)
     }
 }
 
@@ -223,7 +252,7 @@ fun DrawerItem(
             Spacer(modifier = Modifier.width(24.dp))
             Text(
                 text = drawerItemData.buttonText,
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.h4,
                 fontSize = 24.sp,
                 modifier = Modifier.padding(8.dp)
             )
