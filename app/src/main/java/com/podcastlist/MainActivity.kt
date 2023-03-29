@@ -15,9 +15,11 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +32,7 @@ import com.podcastlist.ui.screen.HomeScreen
 import com.podcastlist.ui.screen.LoginDrawerItem
 import com.podcastlist.ui.screen.SettingsScreen
 import com.podcastlist.ui.screen.LoginScreen
+import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,7 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 enum class Screen {
-    HOME, SETTINGS, LOGIN
+    HOME, SETTINGS, LOGIN, SPLASH, SIGNUP
 }
 
 @Immutable
@@ -50,7 +53,9 @@ data class DrawerItemData(
 
 val screenToTitleDict = mapOf(
     Screen.HOME to "Home",
-    Screen.SETTINGS to "Settings"
+    Screen.SETTINGS to "Settings",
+    Screen.LOGIN to "Login",
+    Screen.SIGNUP to "Register"
 )
 
 @AndroidEntryPoint
@@ -75,6 +80,7 @@ class MainActivity : ComponentActivity() {
 
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ScaffoldDeclaration(
     isAppInDarkTheme: Boolean,
@@ -85,7 +91,8 @@ fun ScaffoldDeclaration(
     val navController = rememberNavController()
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
     val scaffoldState = rememberScaffoldState()
-    val SnackbarManager = SnackbarManager(scaffoldState, scope)
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val SnackbarManager = SnackbarManager(scaffoldState, scope, keyboardController)
     var showTopBar by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -158,7 +165,6 @@ fun Drawer(
                     currentScreen = currentScreen
                 ) {
                     navController.navigate(loginPath)
-                    modifyScreen(Screen.LOGIN)
                 }
 
                 DrawerItem(
@@ -173,7 +179,6 @@ fun Drawer(
                     )
                 ) {
                     navController.navigate(homePath)
-                    modifyScreen(Screen.HOME)
                 }
 
                 DrawerItem(
@@ -188,7 +193,6 @@ fun Drawer(
                     )
                 ) {
                     navController.navigate(settingsPath)
-                    modifyScreen(Screen.SETTINGS)
                 }
             }
         }
@@ -198,7 +202,8 @@ fun Drawer(
             snackbarManager,
             isAppInDarkTheme,
             setColorTheme,
-            setShowTopBar
+            setShowTopBar,
+            modifyScreen
         )
     }
 }
@@ -209,30 +214,45 @@ fun NavHostDeclaration(
     snackbarManager: SnackbarManager,
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
-    setShowTopBar: (Boolean) -> Unit
+    setShowTopBar: (Boolean) -> Unit,
+    modifyScreen: (Screen) -> Unit
 ) {
     val loginPath = stringResource(R.string.login_path)
     val homePath = stringResource(R.string.home_path)
     val settingsPath = stringResource(R.string.settings_path)
     val splashPath = stringResource(R.string.splash_path)
+    val signUpPath = stringResource(R.string.signup_path)
     NavHost(
         navController = navController,
         startDestination = splashPath
     ) {
         composable(loginPath) {
-            LoginScreen(snackbarManager = snackbarManager)
+            modifyScreen(Screen.LOGIN)
+            LoginScreen(snackbarManager = snackbarManager) {
+                navController.navigate(signUpPath)
+            }
         }
 
         composable(homePath) {
+            modifyScreen(Screen.HOME)
             HomeScreen()
         }
 
         composable(settingsPath) {
+            modifyScreen(Screen.SETTINGS)
             SettingsScreen(isAppInDarkTheme, setColorTheme)
         }
 
         composable(splashPath) {
-            SplashScreen({ navController.navigate(homePath) }, setShowTopBar)
+            modifyScreen(Screen.SPLASH)
+            SplashScreen(setShowTopBar) {
+                navController.navigate(homePath)
+            }
+        }
+
+        composable(signUpPath) {
+            modifyScreen(Screen.SIGNUP)
+            SignUpScreen(snackbarManager = snackbarManager)
         }
     }
 }

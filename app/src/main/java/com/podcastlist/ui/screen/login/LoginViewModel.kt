@@ -37,13 +37,13 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onSignInClick() {
-        if (!email.isValidEmail()) {
-            snackbarManager.showMessage(INVALID_EMAIL_TEXT)
+        if (!email.isEmailValid()) {
+            snackbarManager.showMessage(INVALID_EMAIL_TEXT, true)
             return
         }
 
-        if (password.isValidPassword()) {
-            snackbarManager.showMessage(INVALID_PASSWORD_TEXT)
+        if (!password.isPasswordValid()) {
+            snackbarManager.showMessage(INVALID_PASSWORD_TEXT, true)
             return
         }
 
@@ -51,20 +51,20 @@ class LoginViewModel @Inject constructor(
             try {
                 accountService.authenticate(email, password)
             } catch (e: FirebaseAuthInvalidUserException) {
-                snackbarManager.showMessage(INVALID_COMBINATION_TEXT)
+                snackbarManager.showMessage(INVALID_COMBINATION_TEXT, true)
             }
         }
     }
 
     fun onForgotPasswordClick() {
-        if (!email.isValidEmail()) {
-            snackbarManager.showMessage(INVALID_EMAIL_TEXT)
+        if (!email.isEmailValid()) {
+            snackbarManager.showMessage(INVALID_EMAIL_TEXT, true)
             return
         }
 
         viewModelScope.launch {
             accountService.sendRecoveryEmail(email)
-            snackbarManager.showMessage(RECOVERY_MAIL_TEXT)
+            snackbarManager.showMessage(RECOVERY_MAIL_TEXT, true)
         }
     }
 }

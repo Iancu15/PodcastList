@@ -17,34 +17,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.podcastlist.R
+import com.podcastlist.ui.composables.PodcastIcon
 import kotlinx.coroutines.delay
 
 private const val SPLASH_TIMEOUT = 1000L
 
 @Composable
 fun SplashScreen(
-    navigateHome: () -> Unit,
     setShowTopBar: (Boolean) -> Unit,
-    viewModel: SplashViewModel = hiltViewModel()
+    viewModel: SplashViewModel = hiltViewModel(),
+    navigateHome: () -> Unit,
 ) {
     val scale = remember {
         androidx.compose.animation.core.Animatable(0f)
     }
 
     Column(
-        modifier = Modifier.fillMaxHeight()
+        modifier = Modifier
+            .fillMaxHeight()
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.podcasts_48px),
-            contentDescription = stringResource(R.string.podcasts_decorative_icon),
-            modifier = Modifier
-                .size(300.dp)
-                .scale(scale.value)
-        )
-
+        PodcastIcon(modifier = Modifier.size(300.dp).scale(scale.value))
         CircularProgressIndicator(color = MaterialTheme.colors.onBackground)
     }
 

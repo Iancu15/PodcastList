@@ -39,19 +39,19 @@ class SignUpViewModel @Inject constructor(
         uiState.value = uiState.value.copy(repeatPassword = newValue)
     }
 
-    fun onSignUpClick(openAndPopUp: (String, String) -> Unit) {
-        if (!email.isValidEmail()) {
-            snackbarManager.showMessage(INVALID_EMAIL_TEXT)
+    fun onSignUpClick() {
+        if (!email.isEmailValid()) {
+            snackbarManager.showMessage(INVALID_EMAIL_TEXT, true)
             return
         }
 
-        if (!password.isValidPassword()) {
-            snackbarManager.showMessage(INVALID_PASSWORD_TEXT)
+        if (!password.isPasswordValid()) {
+            snackbarManager.showMessage(INVALID_PASSWORD_TEXT, true)
             return
         }
 
         if (password != uiState.value.repeatPassword) {
-            snackbarManager.showMessage(PASSWORDS_NOT_MATCH_TEXT)
+            snackbarManager.showMessage(PASSWORDS_NOT_MATCH_TEXT, true)
             return
         }
 

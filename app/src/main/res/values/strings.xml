@@ -21,4 +21,6 @@
     <string name="forgot_password_text">Forgot password</string>
     <string name="register_text">Register</string>
     <string name="splash_path">splash</string>
+    <string name="signup_path">signup</string>
+    <string name="signup_title">Sign up</string>
 </resources>
