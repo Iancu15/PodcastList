@@ -2,7 +2,10 @@ package com.podcastlist.ui.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -11,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.painterResource
@@ -40,7 +44,8 @@ fun EmailField(
         placeholder = { Text(stringResource(R.string.email_placeholder)) },
         leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = stringResource(
             R.string.email_icon)
-        ) }
+        ) },
+        modifier = Modifier.fillMaxWidth(0.8f)
     )
 }
 
@@ -70,11 +75,12 @@ fun PasswordField(
                 Icon(
                     painter = painterResource(id = iconId),
                     contentDescription = stringResource(R.string.visibility_icon),
-                    modifier = Modifier.size(30.dp).padding(bottom = 10.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
         },
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        modifier = Modifier.fillMaxWidth(0.8f)
     )
 }
 @OptIn(ExperimentalComposeUiApi::class)
@@ -84,34 +90,64 @@ fun LoginScreen(
     snackbarManager: SnackbarManager
 ) {
     val uiState by viewModel.uiState
-//    viewModel.setSnackbarManager(snackbarManager)
+    viewModel.snackbarManager = snackbarManager
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier
+            .fillMaxHeight()
             .fillMaxWidth()
-            .fillMaxHeight(),
-        verticalArrangement = Arrangement.Center,
+            .verticalScroll(rememberScrollState())
+            .padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Icon(
+            painter = painterResource(id = R.drawable.podcasts_48px),
+            contentDescription = stringResource(R.string.podcasts_decorative_icon),
+            modifier = Modifier
+                .size(200.dp)
+                .padding(bottom = 20.dp)
+        )
         EmailField(value = uiState.email, onEmailChange = viewModel::onEmailChange)
         PasswordField(value = uiState.password, onPasswordChange = viewModel::onPasswordChange)
         Button(
             onClick = {
-                //viewModel.onSignInClick()
+                viewModel.onSignInClick()
                 keyboardController?.hide()
-            }
+            },
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .fillMaxWidth(0.8f)
+                .clip(RoundedCornerShape(15))
+                .height(40.dp)
         ) {
-            Text("Login")
+            Text(stringResource(id = R.string.login_title))
         }
-        
-        TextButton(
-            onClick = {
-                //viewModel.onForgotPasswordClick()
-                keyboardController?.hide()
-            }
+
+        Row(
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text("Forgot password")
+            TextButton(
+                onClick = {
+                    viewModel.onForgotPasswordClick()
+                    keyboardController?.hide()
+                }
+            ) {
+                Text(stringResource(R.string.forgot_password_text))
+            }
+
+            Divider(
+                modifier = Modifier.height(10.dp).width(1.dp),
+                color = MaterialTheme.colors.onSurface
+            )
+
+            TextButton(
+                onClick = {
+                    // TODO
+                }
+            ) {
+                Text(stringResource(R.string.register_text))
+            }
         }
     }
 }

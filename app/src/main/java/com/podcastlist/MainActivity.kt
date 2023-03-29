@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +30,7 @@ import com.podcastlist.ui.screen.HomeScreen
 import com.podcastlist.ui.screen.LoginDrawerItem
 import com.podcastlist.ui.screen.SettingsScreen
 import com.podcastlist.ui.screen.LoginScreen
+import com.podcastlist.ui.screen.splash.SplashScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +59,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val isSystemInDarkThemeValue = isSystemInDarkTheme()
-            var isAppInDarkTheme by remember { mutableStateOf(isSystemInDarkThemeValue) }
+            var isAppInDarkTheme by rememberSaveable { mutableStateOf(isSystemInDarkThemeValue) }
             MyApplicationTheme(darkTheme = isAppInDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -84,29 +86,32 @@ fun ScaffoldDeclaration(
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
     val scaffoldState = rememberScaffoldState()
     val SnackbarManager = SnackbarManager(scaffoldState, scope)
+    var showTopBar by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(screenToTitleDict.getOrDefault(currentScreen, stringResource(R.string.app_title)))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                if (drawerState.isOpen) {
-                                    drawerState.close()
-                                } else {
-                                    drawerState.open()
+            if (showTopBar)
+                TopAppBar(
+                    title = {
+                        Text(screenToTitleDict.getOrDefault(currentScreen, stringResource(R.string.app_title)))
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    if (drawerState.isOpen) {
+                                        drawerState.close()
+                                    } else {
+                                        drawerState.open()
+                                    }
                                 }
                             }
+                        ) {
+                            Icon(Icons.Filled.Menu, contentDescription = null)
                         }
-                    ) {
-                        Icon(Icons.Filled.Menu, contentDescription = null)
                     }
-                }
-            )
+                )
         }
     ) {
         Drawer(
@@ -117,41 +122,13 @@ fun ScaffoldDeclaration(
             SnackbarManager,
             currentScreen,
             isAppInDarkTheme,
-            setColorTheme
+            setColorTheme,
+            { newValue -> showTopBar = newValue }
         ) { newScreen ->
             currentScreen = newScreen
         }
     }
 }
-
-@Composable
-fun NavHostDeclaration(
-    navController: NavHostController,
-    snackbarManager: SnackbarManager,
-    isAppInDarkTheme: Boolean,
-    setColorTheme: (Boolean) -> Unit
-) {
-    val loginPath = stringResource(R.string.login_path)
-    val homePath = stringResource(R.string.home_path)
-    val settingsPath = stringResource(R.string.settings_path)
-    NavHost(
-        navController = navController,
-        startDestination = homePath
-    ) {
-        composable(loginPath) {
-            LoginScreen(snackbarManager = snackbarManager)
-        }
-
-        composable(homePath) {
-            HomeScreen()
-        }
-
-        composable(settingsPath) {
-            SettingsScreen(isAppInDarkTheme, setColorTheme)
-        }
-    }
-}
-
 @Composable
 fun Drawer(
     paddingValues: PaddingValues,
@@ -162,6 +139,7 @@ fun Drawer(
     currentScreen: Screen,
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
+    setShowTopBar: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit
 ) {
     val loginPath = stringResource(R.string.login_path)
@@ -215,10 +193,49 @@ fun Drawer(
             }
         }
     ) {
-        NavHostDeclaration(navController, snackbarManager, isAppInDarkTheme, setColorTheme)
+        NavHostDeclaration(
+            navController,
+            snackbarManager,
+            isAppInDarkTheme,
+            setColorTheme,
+            setShowTopBar
+        )
     }
 }
 
+@Composable
+fun NavHostDeclaration(
+    navController: NavHostController,
+    snackbarManager: SnackbarManager,
+    isAppInDarkTheme: Boolean,
+    setColorTheme: (Boolean) -> Unit,
+    setShowTopBar: (Boolean) -> Unit
+) {
+    val loginPath = stringResource(R.string.login_path)
+    val homePath = stringResource(R.string.home_path)
+    val settingsPath = stringResource(R.string.settings_path)
+    val splashPath = stringResource(R.string.splash_path)
+    NavHost(
+        navController = navController,
+        startDestination = splashPath
+    ) {
+        composable(loginPath) {
+            LoginScreen(snackbarManager = snackbarManager)
+        }
+
+        composable(homePath) {
+            HomeScreen()
+        }
+
+        composable(settingsPath) {
+            SettingsScreen(isAppInDarkTheme, setColorTheme)
+        }
+
+        composable(splashPath) {
+            SplashScreen({ navController.navigate(homePath) }, setShowTopBar)
+        }
+    }
+}
 @Composable
 fun DrawerItem(
     drawerState: DrawerState,

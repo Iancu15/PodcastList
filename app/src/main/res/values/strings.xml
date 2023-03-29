@@ -17,4 +17,8 @@
     <string name="password_placeholder">password</string>
     <string name="password_icon">Icon used for password text field</string>
     <string name="visibility_icon">Icon used to toggle password visibility</string>
+    <string name="podcasts_decorative_icon">Decorative large icon to represent the app</string>
+    <string name="forgot_password_text">Forgot password</string>
+    <string name="register_text">Register</string>
+    <string name="splash_path">splash</string>
 </resources>
