@@ -1,17 +1,13 @@
-package com.podcastlist.ui.screen
+package com.podcastlist.ui.screen.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.podcastlist.Screen
@@ -25,12 +21,13 @@ import com.podcastlist.auth.EmailField
 import com.podcastlist.auth.PasswordField
 import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.composables.PodcastIcon
-import com.podcastlist.ui.screen.login.LoginViewModel
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     snackbarManager: SnackbarManager,
+    navigateHome: () -> Unit,
     navigateRegister: () -> Unit
 ) {
     val uiState by viewModel.uiState
@@ -50,7 +47,7 @@ fun LoginScreen(
         EmailField(value = uiState.email, onEmailChange = viewModel::onEmailChange)
         PasswordField(value = uiState.password, onPasswordChange = viewModel::onPasswordChange)
         AuthButton(stringResource(id = R.string.login_title)) {
-            viewModel.onSignInClick()
+            viewModel.onSignInClick(navigateHome)
         }
 
         Row(
@@ -98,7 +95,7 @@ fun LoginDrawerItem(
             .padding(bottom = 10.dp)
             .clickable {
                 onNavigate()
-                scope.launch { drawerState.close() }
+                scope.launch(Dispatchers.Main) { drawerState.close() }
             }
             .fillMaxWidth()
             .height(60.dp),

@@ -3,9 +3,12 @@ package com.podcastlist.ui.screen.signup
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.podcastlist.auth.*
 import com.podcastlist.ui.screen.PodcastListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,7 +42,7 @@ class SignUpViewModel @Inject constructor(
         uiState.value = uiState.value.copy(repeatPassword = newValue)
     }
 
-    fun onSignUpClick() {
+    fun onSignUpClick(navigateToLogin: () -> Unit) {
         if (!email.isEmailValid()) {
             snackbarManager.showMessage(INVALID_EMAIL_TEXT, true)
             return
@@ -55,7 +58,13 @@ class SignUpViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
-            accountService.linkAccount(email, password) }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                accountService.linkAccount(email, password)
+                navigateToLogin()
+            } catch (e: FirebaseAuthException) {
+                e.message?.let { snackbarManager.showMessage(it, true) }
+            }
+        }
     }
 }

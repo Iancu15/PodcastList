@@ -23,7 +23,8 @@ import com.podcastlist.ui.screen.login.LoginViewModel
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel = hiltViewModel(),
-    snackbarManager: SnackbarManager
+    snackbarManager: SnackbarManager,
+    navigateToLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState
     viewModel.snackbarManager = snackbarManager
@@ -43,7 +44,7 @@ fun SignUpScreen(
         PasswordField(value = uiState.password, onPasswordChange = viewModel::onPasswordChange)
         PasswordField(value = uiState.repeatPassword, onPasswordChange = viewModel::onRepeatPasswordChange)
         AuthButton(stringResource(R.string.signup_title)) {
-            viewModel.onSignUpClick()
+            viewModel.onSignUpClick(navigateToLogin)
         }
     }
 }

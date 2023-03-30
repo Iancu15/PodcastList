@@ -1,4 +1,4 @@
-package com.podcastlist.model
+package com.podcastlist.auth
 
 data class User(
     val id: String = "",

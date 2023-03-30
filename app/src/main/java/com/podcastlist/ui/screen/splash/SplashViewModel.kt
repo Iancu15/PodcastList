@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.podcastlist.auth.AccountService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,7 +15,7 @@ class SplashViewModel @Inject constructor(
 
     fun onAppStart() {
         if (!accountService.hasUser)
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 accountService.createAnonymousAccount()
             }
     }

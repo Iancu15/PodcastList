@@ -1,15 +1,16 @@
 package com.podcastlist.ui.screen.login
 
-import android.util.Patterns
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.podcastlist.auth.*
-import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.screen.PodcastListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class LoginUiState(
@@ -36,7 +37,7 @@ class LoginViewModel @Inject constructor(
         uiState.value = uiState.value.copy(password = newValue)
     }
 
-    fun onSignInClick() {
+    fun onSignInClick(navigateHome: () -> Unit) {
         if (!email.isEmailValid()) {
             snackbarManager.showMessage(INVALID_EMAIL_TEXT, true)
             return
@@ -47,11 +48,20 @@ class LoginViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 accountService.authenticate(email, password)
-            } catch (e: FirebaseAuthInvalidUserException) {
-                snackbarManager.showMessage(INVALID_COMBINATION_TEXT, true)
+                withContext(Dispatchers.Main) {
+                    navigateHome()
+                }
+            } catch (e: Exception) {
+                when (e) {
+                    is FirebaseAuthInvalidUserException, is FirebaseAuthInvalidCredentialsException -> {
+                        snackbarManager.showMessage(INVALID_COMBINATION_TEXT, true)
+                    }
+                    is FirebaseAuthException -> e.message?.let { snackbarManager.showMessage(it, true) }
+                    else -> throw e
+                }
             }
         }
     }
@@ -62,9 +72,10 @@ class LoginViewModel @Inject constructor(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             accountService.sendRecoveryEmail(email)
             snackbarManager.showMessage(RECOVERY_MAIL_TEXT, true)
         }
     }
+
 }

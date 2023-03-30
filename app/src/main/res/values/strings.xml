@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">PodcastList</string>
     <string name="settings_icon">Icon used for settings drawer item</string>
     <string name="home_icon">Icon used for home drawer item</string>
     <string name="home_title">Home</string>
@@ -23,4 +23,8 @@
     <string name="splash_path">splash</string>
     <string name="signup_path">signup</string>
     <string name="signup_title">Sign up</string>
+    <string name="dropdown_icon">Icon used to open a dropdown menu</string>
+    <string name="icon_dropdown_open">Icon used to indicate an open dropdown</string>
+    <string name="sign_out_text">Sign out</string>
+    <string name="edit_account_text">Edit account information</string>
 </resources>

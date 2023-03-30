@@ -2,7 +2,6 @@ package com.podcastlist.auth
 
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.podcastlist.model.User
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -29,7 +28,6 @@ class AccountServiceImpl @Inject constructor(
             auth.addAuthStateListener(listener)
             awaitClose { auth.removeAuthStateListener(listener) }
         }
-
     override suspend fun authenticate(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).await()
     }
@@ -55,10 +53,22 @@ class AccountServiceImpl @Inject constructor(
         if (auth.currentUser!!.isAnonymous) {
             auth.currentUser!!.delete()
         }
-        auth.signOut()
 
-        // Sign the user back in anonymously.
+        auth.signOut()
         createAnonymousAccount()
     }
+
+    override fun isUserLoggedOut(): Boolean {
+        if (auth.currentUser == null) {
+            return true
+        }
+
+        return auth.currentUser!!.isAnonymous
+    }
+
+    override fun getUserEmail(): String? {
+        return auth.currentUser!!.email
+    }
+
 
 }

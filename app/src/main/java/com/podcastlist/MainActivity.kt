@@ -20,29 +20,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.screen.HomeScreen
-import com.podcastlist.ui.screen.LoginDrawerItem
+import com.podcastlist.ui.screen.login.LoginDrawerItem
 import com.podcastlist.ui.screen.SettingsScreen
-import com.podcastlist.ui.screen.LoginScreen
+import com.podcastlist.ui.screen.login.LoginScreen
 import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 enum class Screen {
     HOME, SETTINGS, LOGIN, SPLASH, SIGNUP
 }
-
 @Immutable
 data class DrawerItemData(
     val buttonText: String,
@@ -106,10 +108,11 @@ fun ScaffoldDeclaration(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                scope.launch {
+                                scope.launch(Dispatchers.Main) {
                                     if (drawerState.isOpen) {
                                         drawerState.close()
                                     } else {
+                                        keyboardController?.hide()
                                         drawerState.open()
                                     }
                                 }
@@ -147,11 +150,13 @@ fun Drawer(
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
+    viewModel: MainActivityViewModel = hiltViewModel(),
     modifyScreen: (Screen) -> Unit
 ) {
     val loginPath = stringResource(R.string.login_path)
     val homePath = stringResource(R.string.home_path)
     val settingsPath = stringResource(R.string.settings_path)
+    var isUserLoggedOut by remember { mutableStateOf(viewModel.isUserLoggedOut()) }
     ModalDrawer(
         modifier = Modifier.padding(paddingValues),
         drawerState = drawerState,
@@ -159,12 +164,18 @@ fun Drawer(
             Column(
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 10.dp, end = 10.dp)
             ) {
-                LoginDrawerItem(
-                    drawerState = drawerState,
-                    scope = scope,
-                    currentScreen = currentScreen
-                ) {
-                    navController.navigate(loginPath)
+                if (isUserLoggedOut) {
+                    LoginDrawerItem(
+                        drawerState = drawerState,
+                        scope = scope,
+                        currentScreen = currentScreen
+                    ) {
+                        navController.navigate(loginPath)
+                    }
+                } else {
+                    EmailDropdownButton {
+                        newValue -> isUserLoggedOut = newValue
+                    }
                 }
 
                 DrawerItem(
@@ -203,8 +214,93 @@ fun Drawer(
             isAppInDarkTheme,
             setColorTheme,
             setShowTopBar,
-            modifyScreen
+            modifyScreen,
+            { newValue -> isUserLoggedOut = newValue }
         )
+    }
+}
+
+@Composable
+fun EmailDropdownButton(
+    viewModel: MainActivityViewModel = hiltViewModel(),
+    setIsUserLoggedOut: (Boolean) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 10.dp)
+    ) {
+        Surface(
+            modifier = Modifier
+                .clip(RoundedCornerShape(15))
+                .clickable {
+                    expanded = true
+                }
+        ) {
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                viewModel.getUserEmail()?.let {
+                    Text(
+                        text = it,
+                        fontSize = 24.sp,
+                        style = MaterialTheme.typography.h2,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.TopStart)
+                ) {
+                    if (expanded) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrow_left_48px),
+                            contentDescription = stringResource(R.string.icon_dropdown_open)
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrow_drop_down_48px),
+                            contentDescription = stringResource(R.string.dropdown_icon)
+                        )
+                    }
+
+                    UserDropdownMenu(setIsUserLoggedOut, expanded) {
+                        expanded = false
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+        Divider()
+    }
+}
+
+@Composable
+fun UserDropdownMenu(
+    setIsUserLoggedOut: (Boolean) -> Unit,
+    expanded: Boolean,
+    viewModel: MainActivityViewModel = hiltViewModel(),
+    dismissMenu: () -> Unit
+) {
+    DropdownMenu(expanded = expanded, onDismissRequest = { dismissMenu() }) {
+        DropdownMenuItem(onClick = { dismissMenu() }) {
+            Text(stringResource(R.string.edit_account_text))
+        }
+
+        Divider()
+        DropdownMenuItem(onClick = {
+            viewModel.signOutUser()
+            setIsUserLoggedOut(true)
+            dismissMenu()
+        }) {
+            Text(stringResource(R.string.sign_out_text))
+        }
     }
 }
 
@@ -215,7 +311,9 @@ fun NavHostDeclaration(
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
-    modifyScreen: (Screen) -> Unit
+    modifyScreen: (Screen) -> Unit,
+    setIsUserLoggedOut: (Boolean) -> Unit,
+    viewModel: MainActivityViewModel = hiltViewModel()
 ) {
     val loginPath = stringResource(R.string.login_path)
     val homePath = stringResource(R.string.home_path)
@@ -228,13 +326,17 @@ fun NavHostDeclaration(
     ) {
         composable(loginPath) {
             modifyScreen(Screen.LOGIN)
-            LoginScreen(snackbarManager = snackbarManager) {
+            LoginScreen(
+                snackbarManager = snackbarManager,
+                navigateHome = { navController.navigate(homePath) }
+            ) {
                 navController.navigate(signUpPath)
             }
         }
 
         composable(homePath) {
             modifyScreen(Screen.HOME)
+            setIsUserLoggedOut(viewModel.isUserLoggedOut())
             HomeScreen()
         }
 
@@ -252,7 +354,9 @@ fun NavHostDeclaration(
 
         composable(signUpPath) {
             modifyScreen(Screen.SIGNUP)
-            SignUpScreen(snackbarManager = snackbarManager)
+            SignUpScreen(snackbarManager = snackbarManager) {
+                navController.navigate(loginPath)
+            }
         }
     }
 }
@@ -273,7 +377,7 @@ fun DrawerItem(
             .clip(RoundedCornerShape(15))
             .clickable {
                 onNavigate()
-                scope.launch { drawerState.close() }
+                scope.launch(Dispatchers.Main) { drawerState.close() }
             }
             .fillMaxWidth()
             .height(50.dp),
