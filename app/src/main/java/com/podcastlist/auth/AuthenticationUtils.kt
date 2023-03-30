@@ -9,6 +9,12 @@ const val INVALID_PASSWORD_TEXT = "Invalid password, it should have at least 6 c
 const val INVALID_COMBINATION_TEXT = "Email and/or password is wrong"
 const val RECOVERY_MAIL_TEXT = "Recovery email was sent"
 const val PASSWORDS_NOT_MATCH_TEXT = "Passwords don't match"
+const val SUCCESSFUL_LOGIN = "You logged in successfully!"
+const val SUCCESSFUL_REGISTER = "Your account was registered successfully!"
+const val SUCCESSFUL_EMAIL_CHANGE = "Email changed successfully!"
+const val SUCCESSFUL_PASSWORD_CHANGE = "Password changed successfully!"
+const val SUCCESSFUL_ACCOUNT_DELETE = "Account was deleted successfully!"
+const val INVALID_NEW_PASSWORD = "New password should be different from the current password"
 
 private const val PASS_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,}$"
 

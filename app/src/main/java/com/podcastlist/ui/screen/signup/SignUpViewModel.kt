@@ -10,6 +10,7 @@ import com.podcastlist.ui.screen.PodcastListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class SignUpUiState(
@@ -61,7 +62,10 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 accountService.linkAccount(email, password)
-                navigateToLogin()
+                snackbarManager.showMessage(SUCCESSFUL_REGISTER, true)
+                withContext(Dispatchers.Main) {
+                    navigateToLogin()
+                }
             } catch (e: FirebaseAuthException) {
                 e.message?.let { snackbarManager.showMessage(it, true) }
             }

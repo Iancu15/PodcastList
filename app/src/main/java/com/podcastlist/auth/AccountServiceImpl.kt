@@ -47,6 +47,7 @@ class AccountServiceImpl @Inject constructor(
 
     override suspend fun deleteAccount() {
         auth.currentUser!!.delete().await()
+        createAnonymousAccount()
     }
 
     override suspend fun signOut() {
@@ -56,6 +57,14 @@ class AccountServiceImpl @Inject constructor(
 
         auth.signOut()
         createAnonymousAccount()
+    }
+
+    override suspend fun changeEmail(email: String) {
+        auth.currentUser!!.updateEmail(email)
+    }
+
+    override suspend fun changePassword(password: String) {
+        auth.currentUser!!.updatePassword(password)
     }
 
     override fun isUserLoggedOut(): Boolean {

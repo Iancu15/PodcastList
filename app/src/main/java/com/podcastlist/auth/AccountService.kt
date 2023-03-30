@@ -13,6 +13,10 @@ interface AccountService {
     suspend fun deleteAccount()
     suspend fun signOut()
 
+    suspend fun changeEmail(email: String)
+
+    suspend fun changePassword(password: String)
+
     fun isUserLoggedOut(): Boolean
 
     fun getUserEmail(): String?

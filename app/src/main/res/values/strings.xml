@@ -27,4 +27,11 @@
     <string name="icon_dropdown_open">Icon used to indicate an open dropdown</string>
     <string name="sign_out_text">Sign out</string>
     <string name="edit_account_text">Edit account information</string>
+    <string name="edit_account_path">edit_account</string>
+    <string name="current_password_label">Current password</string>
+    <string name="current_password_placeholder">current password</string>
+    <string name="new_password_label">New password</string>
+    <string name="new_password_placeholder">new password</string>
+    <string name="change_email_text">Change email</string>
+    <string name="change_password_text">Change password</string>
 </resources>

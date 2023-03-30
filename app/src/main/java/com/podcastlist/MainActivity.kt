@@ -33,6 +33,7 @@ import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.screen.HomeScreen
 import com.podcastlist.ui.screen.login.LoginDrawerItem
 import com.podcastlist.ui.screen.SettingsScreen
+import com.podcastlist.ui.screen.edit_account.EditAccountScreen
 import com.podcastlist.ui.screen.login.LoginScreen
 import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
@@ -43,7 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 enum class Screen {
-    HOME, SETTINGS, LOGIN, SPLASH, SIGNUP
+    HOME, SETTINGS, LOGIN, SPLASH, SIGNUP, EDIT_ACCOUNT
 }
 @Immutable
 data class DrawerItemData(
@@ -57,7 +58,8 @@ val screenToTitleDict = mapOf(
     Screen.HOME to "Home",
     Screen.SETTINGS to "Settings",
     Screen.LOGIN to "Login",
-    Screen.SIGNUP to "Register"
+    Screen.SIGNUP to "Register",
+    Screen.EDIT_ACCOUNT to "Edit account information"
 )
 
 @AndroidEntryPoint
@@ -156,6 +158,7 @@ fun Drawer(
     val loginPath = stringResource(R.string.login_path)
     val homePath = stringResource(R.string.home_path)
     val settingsPath = stringResource(R.string.settings_path)
+    val editAccountPath = stringResource(id = R.string.edit_account_path)
     var isUserLoggedOut by remember { mutableStateOf(viewModel.isUserLoggedOut()) }
     ModalDrawer(
         modifier = Modifier.padding(paddingValues),
@@ -173,7 +176,12 @@ fun Drawer(
                         navController.navigate(loginPath)
                     }
                 } else {
-                    EmailDropdownButton {
+                    EmailDropdownButton(
+                        navigateToEditAccount = { navController.navigate(editAccountPath) },
+                        closeDrawer = { scope.launch(Dispatchers.Main) {
+                            drawerState.close()
+                        } }
+                    ) {
                         newValue -> isUserLoggedOut = newValue
                     }
                 }
@@ -223,6 +231,8 @@ fun Drawer(
 @Composable
 fun EmailDropdownButton(
     viewModel: MainActivityViewModel = hiltViewModel(),
+    closeDrawer: () -> Unit,
+    navigateToEditAccount: () -> Unit,
     setIsUserLoggedOut: (Boolean) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -269,7 +279,12 @@ fun EmailDropdownButton(
                         )
                     }
 
-                    UserDropdownMenu(setIsUserLoggedOut, expanded) {
+                    UserDropdownMenu(
+                        setIsUserLoggedOut,
+                        expanded,
+                        navigateToEditAccount,
+                        closeDrawer
+                    ) {
                         expanded = false
                     }
                 }
@@ -285,19 +300,25 @@ fun EmailDropdownButton(
 fun UserDropdownMenu(
     setIsUserLoggedOut: (Boolean) -> Unit,
     expanded: Boolean,
+    navigateToEditAccount: () -> Unit,
+    closeDrawer: () -> Unit,
     viewModel: MainActivityViewModel = hiltViewModel(),
     dismissMenu: () -> Unit
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = { dismissMenu() }) {
-        DropdownMenuItem(onClick = { dismissMenu() }) {
+        DropdownMenuItem(onClick = {
+            dismissMenu()
+            closeDrawer()
+            navigateToEditAccount()
+        }) {
             Text(stringResource(R.string.edit_account_text))
         }
 
         Divider()
         DropdownMenuItem(onClick = {
+            dismissMenu()
             viewModel.signOutUser()
             setIsUserLoggedOut(true)
-            dismissMenu()
         }) {
             Text(stringResource(R.string.sign_out_text))
         }
@@ -320,6 +341,7 @@ fun NavHostDeclaration(
     val settingsPath = stringResource(R.string.settings_path)
     val splashPath = stringResource(R.string.splash_path)
     val signUpPath = stringResource(R.string.signup_path)
+    val editAccountPath = stringResource(R.string.edit_account_path)
     NavHost(
         navController = navController,
         startDestination = splashPath
@@ -356,6 +378,13 @@ fun NavHostDeclaration(
             modifyScreen(Screen.SIGNUP)
             SignUpScreen(snackbarManager = snackbarManager) {
                 navController.navigate(loginPath)
+            }
+        }
+
+        composable(editAccountPath) {
+            modifyScreen(Screen.EDIT_ACCOUNT)
+            EditAccountScreen(snackbarManager = snackbarManager) {
+                navController.navigate(homePath)
             }
         }
     }

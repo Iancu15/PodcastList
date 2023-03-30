@@ -15,11 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.podcastlist.R
+import org.intellij.lang.annotations.JdkConstants.TabPlacement
 
 @Composable
 fun EmailField(
@@ -42,7 +44,9 @@ fun EmailField(
 @Composable
 fun PasswordField(
     value: String,
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    label: String = stringResource(R.string.password_label),
+    placeholder: String = stringResource(R.string.password_placeholder)
 ) {
     var isVisible by remember { mutableStateOf(false) }
     val visualTransformation =
@@ -52,10 +56,10 @@ fun PasswordField(
 
     OutlinedTextField(
         singleLine = true,
-        label = { Text(stringResource(R.string.password_label)) },
+        label = { Text(label) },
         onValueChange = { onPasswordChange(it) },
         value = value,
-        placeholder = { Text(stringResource(R.string.password_placeholder)) },
+        placeholder = { Text(placeholder) },
         leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = stringResource(
             R.string.password_icon)
         ) },
@@ -77,6 +81,7 @@ fun PasswordField(
 @Composable
 fun AuthButton(
     buttonText: String,
+    colors: ButtonColors = ButtonDefaults.buttonColors(),
     authAction: () -> Unit
 ) {
     Button(
@@ -87,7 +92,8 @@ fun AuthButton(
             .padding(top = 10.dp)
             .fillMaxWidth(0.8f)
             .clip(RoundedCornerShape(15))
-            .height(40.dp)
+            .height(40.dp),
+        colors = colors
     ) {
         Text(buttonText)
     }

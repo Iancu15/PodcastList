@@ -51,6 +51,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 accountService.authenticate(email, password)
+                snackbarManager.showMessage(SUCCESSFUL_LOGIN, true)
                 withContext(Dispatchers.Main) {
                     navigateHome()
                 }

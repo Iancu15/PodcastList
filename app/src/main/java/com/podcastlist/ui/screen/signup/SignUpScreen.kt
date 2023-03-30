@@ -17,6 +17,7 @@ import com.podcastlist.auth.AuthButton
 import com.podcastlist.auth.EmailField
 import com.podcastlist.auth.PasswordField
 import com.podcastlist.ui.SnackbarManager
+import com.podcastlist.ui.composables.FormColumn
 import com.podcastlist.ui.composables.PodcastIcon
 import com.podcastlist.ui.screen.login.LoginViewModel
 
@@ -29,14 +30,7 @@ fun SignUpScreen(
     val uiState by viewModel.uiState
     viewModel.snackbarManager = snackbarManager
 
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(top = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    FormColumn {
         PodcastIcon(modifier = Modifier
             .size(200.dp)
             .padding(bottom = 20.dp))
