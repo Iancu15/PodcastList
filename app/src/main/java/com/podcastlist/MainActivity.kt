@@ -5,60 +5,26 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.podcastlist.ui.SnackbarManager
-import com.podcastlist.ui.screen.HomeScreen
-import com.podcastlist.ui.screen.login.LoginDrawerItem
-import com.podcastlist.ui.screen.SettingsScreen
-import com.podcastlist.ui.screen.edit_account.EditAccountScreen
-import com.podcastlist.ui.screen.login.LoginScreen
-import com.podcastlist.ui.screen.signup.SignUpScreen
-import com.podcastlist.ui.screen.splash.SplashScreen
 import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
-import com.spotify.protocol.types.Track
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 enum class Screen {
     HOME, SETTINGS, LOGIN, SPLASH, SIGNUP, EDIT_ACCOUNT
 }
-@Immutable
-data class DrawerItemData(
-    val buttonText: String,
-    val iconImageVector: ImageVector,
-    val iconDescriptionId: Int,
-    val screen: Screen
-)
 
 val screenToTitleDict = mapOf(
     Screen.HOME to "Home",
@@ -103,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 spotifyAppRemote = appRemote
                 Log.d("MainActivity", "Connected! Yay!")
                 // Now you can start interacting with App Remote
-                connected()
+                //connected()
             }
 
             override fun onFailure(throwable: Throwable) {
@@ -113,18 +79,18 @@ class MainActivity : ComponentActivity() {
         })
     }
 
-    private fun connected() {
-        spotifyAppRemote?.let {
-            // Play a playlist
-            val playlistURI = "spotify:playlist:37i9dQZF1DX2sUQwD7tbmL"
-            it.playerApi.play(playlistURI)
-            // Subscribe to PlayerState
-            it.playerApi.subscribeToPlayerState().setEventCallback {
-                val track: Track = it.track
-                Log.d("MainActivity", track.name + " by " + track.artist.name)
-            }
-        }
-    }
+//    private fun connected() {
+//        spotifyAppRemote?.let {
+//            // Play a playlist
+//            val playlistURI = "spotify:playlist:37i9dQZF1DX2sUQwD7tbmL"
+//            it.playerApi.play(playlistURI)
+//            // Subscribe to PlayerState
+//            it.playerApi.subscribeToPlayerState().setEventCallback {
+//                val track: Track = it.track
+//                Log.d("MainActivity", track.name + " by " + track.artist.name)
+//            }
+//        }
+//    }
 
     override fun onStop() {
         super.onStop()

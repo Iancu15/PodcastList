@@ -51,7 +51,7 @@ fun NavHostDeclaration(
         composable(homePath) {
             modifyScreen(Screen.HOME)
             setIsUserLoggedOut(viewModel.isUserLoggedOut())
-            HomeScreen()
+            HomeScreen(snackbarManager = snackbarManager)
         }
 
         composable(settingsPath) {

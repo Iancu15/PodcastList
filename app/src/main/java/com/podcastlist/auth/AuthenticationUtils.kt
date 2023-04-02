@@ -14,7 +14,6 @@ const val SUCCESSFUL_REGISTER = "Your account was registered successfully!"
 const val SUCCESSFUL_EMAIL_CHANGE = "Email changed successfully!"
 const val SUCCESSFUL_PASSWORD_CHANGE = "Password changed successfully!"
 const val SUCCESSFUL_ACCOUNT_DELETE = "Account was deleted successfully!"
-const val INVALID_NEW_PASSWORD = "New password should be different from the current password"
 
 private const val PASS_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{6,}$"
 

@@ -11,12 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.podcastlist.DrawerItemData
 import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.Screen
@@ -25,6 +25,14 @@ import com.podcastlist.ui.screen.login.LoginDrawerItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+@Immutable
+data class DrawerItemData(
+    val buttonText: String,
+    val iconImageVector: ImageVector,
+    val iconDescriptionId: Int,
+    val screen: Screen
+)
 
 @Composable
 fun Drawer(
