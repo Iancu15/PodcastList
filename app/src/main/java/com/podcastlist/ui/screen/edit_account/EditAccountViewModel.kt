@@ -3,7 +3,6 @@ package com.podcastlist.ui.screen.edit_account
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.ktx.actionCodeSettings
 import com.podcastlist.auth.*
 import com.podcastlist.ui.screen.PodcastListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

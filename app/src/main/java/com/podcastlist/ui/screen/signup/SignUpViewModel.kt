@@ -1,9 +1,7 @@
 package com.podcastlist.ui.screen.signup
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.podcastlist.auth.*
 import com.podcastlist.ui.screen.PodcastListViewModel

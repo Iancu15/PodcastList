@@ -1,25 +1,28 @@
 package com.podcastlist
 
 import ScaffoldDeclaration
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.sdk.android.auth.AuthorizationClient
+import com.spotify.sdk.android.auth.AuthorizationRequest
+import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
 
 enum class Screen {
@@ -37,8 +40,10 @@ val screenToTitleDict = mapOf(
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val clientId = "fd24490669d84b619df5b235ba17e217"
-    private val redirectUri = "podcastlist://podcastlist.com"
+    private val redirectUri = "com.podcastlist://callback"
     private var spotifyAppRemote: SpotifyAppRemote? = null
+    private val requestCodeValue = 1337
+    private val viewModel: MainActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -59,6 +64,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        val builder = AuthorizationRequest.Builder(
+            clientId,
+            AuthorizationResponse.Type.TOKEN,
+            redirectUri
+        )
+
+        builder.setScopes(arrayOf(
+            "user-library-read",
+            "user-library-modify"
+        ))
+        
+        val request = builder.build()
+        AuthorizationClient.openLoginActivity(this, requestCodeValue, request)
+
         val connectionParams = ConnectionParams.Builder(clientId)
             .setRedirectUri(redirectUri)
             .showAuthView(true)
@@ -96,6 +115,29 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         spotifyAppRemote?.let {
             SpotifyAppRemote.disconnect(it)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        // Check if result comes from the correct activity
+        if (requestCode == requestCodeValue) {
+            val response: AuthorizationResponse =
+                AuthorizationClient.getResponse(resultCode, intent)
+            when (response.type) {
+                AuthorizationResponse.Type.TOKEN -> {
+                    Log.d("MainActivity", "Authorization response successful")
+                    viewModel.storeAuthorizationToken(
+                        accessToken = response.accessToken,
+                        expiresIn = response.expiresIn
+                    )
+                }
+                AuthorizationResponse.Type.ERROR -> {
+                    Log.d("MainActivity", "Authorization response failed: ${response.error}")
+                }
+                else -> {}
+            }
         }
     }
 

@@ -22,12 +22,15 @@ class HomeViewModel @Inject constructor(
     var subscribedPodcasts: SubscribedPodcasts by mutableStateOf(SubscribedPodcasts())
     fun getSubscribedPodcasts() {
         viewModelScope.launch(Dispatchers.IO) {
-            authorizationService.refreshAccessToken()
-            Log.d("HomeViewModel", "Refresh token is ${authorizationService.authorizationTokena}")
             catchException {
-                subscribedPodcasts = spotifyService.getSubscribedPodcasts(
-                    authorization = authorizationService.authorizationToken
-                )
+                Log.d("HomeViewModel", "isTokenAvailable: ${authorizationService.isTokenAvailable}")
+                if (authorizationService.isTokenAvailable) {
+                    subscribedPodcasts = spotifyService.getSubscribedPodcasts(
+                        authorization = authorizationService.authorizationToken
+                    )
+
+                    Log.d("HomeViewModel", "Got ${subscribedPodcasts.items.size} subscribed podcasts}")
+                }
             }
         }
     }

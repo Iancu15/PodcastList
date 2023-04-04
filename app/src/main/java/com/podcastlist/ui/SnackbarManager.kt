@@ -2,7 +2,6 @@ package com.podcastlist.ui
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

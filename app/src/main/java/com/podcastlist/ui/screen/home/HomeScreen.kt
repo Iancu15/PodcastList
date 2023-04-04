@@ -15,11 +15,11 @@ fun HomeScreen(
 ) {
     viewModel.snackbarManager = snackbarManager
     viewModel.getSubscribedPodcasts()
-//    LazyColumn {
-//        items(
-//            viewModel.subscribedPodcasts.items.map { x -> x.show }
-//        ) {
-//            Text(it.name)
-//        }
-//    }
+    LazyColumn {
+        items(
+            viewModel.subscribedPodcasts.items.map { x -> x.show }
+        ) {
+            Text(it.name)
+        }
+    }
 }

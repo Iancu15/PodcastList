@@ -1,9 +1,8 @@
 package com.podcastlist
 
-import android.provider.ContactsContract.CommonDataKinds.Email
-import androidx.lifecycle.ViewModel
+import android.util.Log
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.podcastlist.api.AuthorizationService
 import com.podcastlist.auth.AccountService
 import com.podcastlist.ui.screen.PodcastListViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val authorizationService: AuthorizationService
 ) : PodcastListViewModel() {
 
     fun isUserLoggedOut(): Boolean {
@@ -30,6 +30,13 @@ class MainActivityViewModel @Inject constructor(
                 accountService.signOut()
             }
         }
+    }
+
+    fun storeAuthorizationToken(accessToken: String, expiresIn: Int) {
+        authorizationService.authorizationToken = "Authorization: Bearer $accessToken"
+        authorizationService.isTokenAvailable = true
+        Log.d("MainActivityViewModel", "Token expires in $expiresIn seconds")
+        Log.d("MainActivityViewModel", "Token: ${authorizationService.authorizationToken}")
     }
 
 }

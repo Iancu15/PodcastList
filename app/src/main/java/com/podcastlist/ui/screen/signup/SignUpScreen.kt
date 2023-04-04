@@ -1,14 +1,10 @@
 package com.podcastlist.ui.screen.signup
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,7 +15,6 @@ import com.podcastlist.auth.PasswordField
 import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.composables.FormColumn
 import com.podcastlist.ui.composables.PodcastIcon
-import com.podcastlist.ui.screen.login.LoginViewModel
 
 @Composable
 fun SignUpScreen(
