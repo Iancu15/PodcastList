@@ -11,7 +11,7 @@ data class SubscribedPodcastsItem (
 data class SubscribedPodcast (
     val name: String,
     val id: String,
-    val publisher: String
-
+    val publisher: String,
+    val images: List<PodcastImage>
     )
 

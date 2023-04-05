@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestAuthorization()
         setContent {
             val isSystemInDarkThemeValue = isSystemInDarkTheme()
             var isAppInDarkTheme by rememberSaveable { mutableStateOf(isSystemInDarkThemeValue) }
@@ -62,8 +63,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun requestAuthorization() {
         val builder = AuthorizationRequest.Builder(
             clientId,
             AuthorizationResponse.Type.TOKEN,
@@ -74,10 +74,14 @@ class MainActivity : ComponentActivity() {
             "user-library-read",
             "user-library-modify"
         ))
-        
+
         val request = builder.build()
         AuthorizationClient.openLoginActivity(this, requestCodeValue, request)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
         val connectionParams = ConnectionParams.Builder(clientId)
             .setRedirectUri(redirectUri)
             .showAuthView(true)
