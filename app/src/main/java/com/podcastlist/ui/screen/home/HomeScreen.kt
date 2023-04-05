@@ -60,19 +60,22 @@ fun PodcastCard(
                         text = podcast.name,
                         fontSize = titleSize,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.caption
                     )
                     Text(
                         text = podcast.publisher,
                         fontSize = subtitleSize,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.subtitle1
                     )
                 }
             }
         }
     }
 }
+
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
@@ -80,7 +83,7 @@ fun HomeScreen(
 ) {
     viewModel.snackbarManager = snackbarManager
     LaunchedEffect(key1 = viewModel.subscribedPodcasts.items.isNotEmpty()) {
-        viewModel.getSubscribedPodcasts()
+        viewModel.fetchSubscribedPodcastsWithSnackbar()
     }
 
     val cardsPerRow = 1

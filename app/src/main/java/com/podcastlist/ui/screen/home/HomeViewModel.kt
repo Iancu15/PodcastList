@@ -20,17 +20,25 @@ class HomeViewModel @Inject constructor(
     private val authorizationService: AuthorizationService
 ) : PodcastListViewModel() {
     var subscribedPodcasts: SubscribedPodcasts by mutableStateOf(SubscribedPodcasts())
-    fun getSubscribedPodcasts() {
+
+    fun fetchSubscribedPodcasts() {
         viewModelScope.launch(Dispatchers.IO) {
             catchException {
-                Log.d("HomeViewModel", "isTokenAvailable: ${authorizationService.isTokenAvailable}")
-                if (authorizationService.isTokenAvailable) {
-                    subscribedPodcasts = spotifyService.getSubscribedPodcasts(
-                        authorization = authorizationService.authorizationToken
-                    )
+                subscribedPodcasts = spotifyService.getSubscribedPodcasts(
+                    authorization = authorizationService.authorizationToken
+                )
 
-                    Log.d("HomeViewModel", "Got ${subscribedPodcasts.items.size} subscribed podcasts}")
-                }
+                Log.d("HomeViewModel", "Got ${subscribedPodcasts.items.size} subscribed podcasts}")
+            }
+        }
+    }
+    fun fetchSubscribedPodcastsWithSnackbar() {
+        Log.d("HomeViewModel", "isTokenAvailable: ${authorizationService.isTokenAvailable}")
+        if (authorizationService.isTokenAvailable) {
+            fetchSubscribedPodcasts()
+        } else {
+            snackbarManager.showRetryMessage("") {
+                fetchSubscribedPodcasts()
             }
         }
     }

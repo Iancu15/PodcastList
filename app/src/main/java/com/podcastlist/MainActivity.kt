@@ -24,19 +24,6 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
-
-enum class Screen {
-    HOME, SETTINGS, LOGIN, SPLASH, SIGNUP, EDIT_ACCOUNT
-}
-
-val screenToTitleDict = mapOf(
-    Screen.HOME to "Home",
-    Screen.SETTINGS to "Settings",
-    Screen.LOGIN to "Login",
-    Screen.SIGNUP to "Register",
-    Screen.EDIT_ACCOUNT to "Edit account information"
-)
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val clientId = "fd24490669d84b619df5b235ba17e217"
