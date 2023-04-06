@@ -1,5 +1,6 @@
 package com.podcastlist.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -79,14 +80,14 @@ fun PodcastCard(
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    snackbarManager: SnackbarManager
+    snackbarManager: SnackbarManager,
+    cardsPerRow: Int
 ) {
     viewModel.snackbarManager = snackbarManager
     LaunchedEffect(key1 = viewModel.subscribedPodcasts.items.isNotEmpty()) {
         viewModel.fetchSubscribedPodcastsWithSnackbar()
     }
 
-    val cardsPerRow = 1
     val cardHeight = 380.dp.div(cardsPerRow)
     val layoutPadding = 8.dp.div(cardsPerRow)
     LazyColumn(

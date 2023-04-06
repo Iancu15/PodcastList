@@ -1,11 +1,8 @@
-import android.content.res.Resources
-import android.util.Log
-import android.view.animation.LinearInterpolator
-import android.view.animation.OvershootInterpolator
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -16,14 +13,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.*
 import com.podcastlist.R
 import com.podcastlist.ui.SnackbarManager
 import com.podcastlist.ui.core.Drawer
+import com.podcastlist.ui.menu.GridViewDropdownMenu
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -40,6 +39,8 @@ fun ScaffoldDeclaration(
     val SnackbarManager = SnackbarManager(scaffoldState, scope, keyboardController)
     var showTopBar by rememberSaveable { mutableStateOf(false) }
     val refreshButtonRotationAngle = remember { Animatable(0f) }
+    var isGridViewDropdownMenuExpanded by remember { mutableStateOf(false) }
+    var cardsPerRow by remember { mutableStateOf(2f) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -62,10 +63,32 @@ fun ScaffoldDeclaration(
                                 }
                             }
                         ) {
-                            Icon(Icons.Filled.Menu, contentDescription = null)
+                            Icon(Icons.Default.Menu, contentDescription = null)
                         }
                     },
                     actions = {
+                        if (currentScreen == Screen.HOME) {
+                            Column {
+                                IconButton(onClick = {
+                                    isGridViewDropdownMenuExpanded = true
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.grid_view_fill0_wght300_grad0_opsz48),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(25.dp)
+                                    )
+                                }
+
+                                GridViewDropdownMenu(
+                                    expanded = isGridViewDropdownMenuExpanded,
+                                    cardsPerRow = cardsPerRow,
+                                    { newValue -> cardsPerRow = newValue }
+                                ) {
+                                    isGridViewDropdownMenuExpanded = false
+                                }
+                            }
+                        }
+
                         IconButton(onClick = {
                             scope.launch(Dispatchers.Main) {
                                 refreshButtonRotationAngle.animateTo(
@@ -83,7 +106,7 @@ fun ScaffoldDeclaration(
                             }
                         }) {
                             Icon(
-                                Icons.Filled.Refresh,
+                                Icons.Default.Refresh,
                                 contentDescription = null,
                                 modifier = Modifier.rotate(refreshButtonRotationAngle.value)
                             )
@@ -99,6 +122,7 @@ fun ScaffoldDeclaration(
             scope,
             SnackbarManager,
             currentScreen,
+            cardsPerRow,
             isAppInDarkTheme,
             setColorTheme,
             { newValue -> showTopBar = newValue }

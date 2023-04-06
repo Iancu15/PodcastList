@@ -22,6 +22,7 @@ fun NavHostDeclaration(
     navController: NavHostController,
     snackbarManager: SnackbarManager,
     isAppInDarkTheme: Boolean,
+    cardsPerRow: Float,
     setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit,
@@ -51,7 +52,10 @@ fun NavHostDeclaration(
         composable(homePath) {
             modifyScreen(Screen.HOME)
             setIsUserLoggedOut(viewModel.isUserLoggedOut())
-            HomeScreen(snackbarManager = snackbarManager)
+            HomeScreen(
+                snackbarManager = snackbarManager,
+                cardsPerRow = cardsPerRow.toInt()
+            )
         }
 
         composable(settingsPath) {
