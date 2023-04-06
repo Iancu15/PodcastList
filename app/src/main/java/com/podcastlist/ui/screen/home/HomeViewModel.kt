@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
         if (authorizationService.isTokenAvailable) {
             fetchSubscribedPodcasts()
         } else {
-            snackbarManager.showRetryMessage("") {
+            snackbarManager.showRetryMessage("Your list of podcasts couldn't be retrieved") {
                 fetchSubscribedPodcasts()
             }
         }
