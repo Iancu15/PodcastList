@@ -16,7 +16,7 @@ import com.podcastlist.Screen
 import com.podcastlist.auth.AuthButton
 import com.podcastlist.auth.EmailField
 import com.podcastlist.auth.PasswordField
-import com.podcastlist.ui.SnackbarManager
+import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.composables.FormColumn
 import com.podcastlist.ui.composables.PodcastIcon
 import kotlinx.coroutines.CoroutineScope

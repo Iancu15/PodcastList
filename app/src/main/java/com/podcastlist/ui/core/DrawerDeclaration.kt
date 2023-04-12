@@ -20,7 +20,7 @@ import androidx.navigation.NavHostController
 import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.Screen
-import com.podcastlist.ui.SnackbarManager
+import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.screen.login.LoginDrawerItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

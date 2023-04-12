@@ -34,4 +34,6 @@
     <string name="new_password_placeholder">new password</string>
     <string name="change_email_text">Change email</string>
     <string name="change_password_text">Change password</string>
+    <string name="search_label">Search</string>
+    <string name="search_placeholder">search podcast</string>
 </resources>

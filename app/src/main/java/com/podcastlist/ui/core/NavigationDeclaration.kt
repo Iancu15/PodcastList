@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.Screen
-import com.podcastlist.ui.SnackbarManager
+import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.screen.HomeScreen
 import com.podcastlist.ui.screen.SettingsScreen
 import com.podcastlist.ui.screen.edit_account.EditAccountScreen

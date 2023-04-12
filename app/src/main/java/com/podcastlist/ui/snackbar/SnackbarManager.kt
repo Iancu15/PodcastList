@@ -1,16 +1,13 @@
-package com.podcastlist.ui
+package com.podcastlist.ui.snackbar
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarResult
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.SoftwareKeyboardController
-import com.podcastlist.ui.screen.PodcastListViewModel
-import com.podcastlist.ui.screen.home.HomeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.reflect.KFunction1
 
 @OptIn(ExperimentalComposeUiApi::class)
 class SnackbarManager constructor(
@@ -43,5 +40,9 @@ class SnackbarManager constructor(
                 }
             }
         }
+    }
+
+    fun showKeyboard() {
+        keyboardController?.show()
     }
 }

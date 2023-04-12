@@ -19,9 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.*
 import com.podcastlist.R
-import com.podcastlist.ui.SnackbarManager
+import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.core.Drawer
+import com.podcastlist.ui.core.FloatingButton
+import com.podcastlist.ui.core.FloatingButtonPopup
 import com.podcastlist.ui.menu.GridViewDropdownMenu
+import com.podcastlist.ui.snackbar.InitializeSnackbars
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
@@ -36,12 +39,14 @@ fun ScaffoldDeclaration(
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
     val scaffoldState = rememberScaffoldState()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val SnackbarManager = SnackbarManager(scaffoldState, scope, keyboardController)
+    val snackbarManager = SnackbarManager(scaffoldState, scope, keyboardController)
     var showTopBar by rememberSaveable { mutableStateOf(false) }
     val refreshButtonRotationAngle = remember { Animatable(0f) }
     var isGridViewDropdownMenuExpanded by remember { mutableStateOf(false) }
     var cardsPerRow by remember { mutableStateOf(2f) }
+    var showAddPopup by remember { mutableStateOf(false) }
 
+    InitializeSnackbars(snackbarManager = snackbarManager)
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -113,21 +118,32 @@ fun ScaffoldDeclaration(
                         }
                     }
                 )
+        },
+        floatingActionButton = {
+            if (currentScreen == Screen.HOME && !showAddPopup) {
+                FloatingButton { showAddPopup = true }
+            }
         }
     ) {
-        Drawer(
-            paddingValues = it,
-            drawerState,
-            navController,
-            scope,
-            SnackbarManager,
-            currentScreen,
-            cardsPerRow,
-            isAppInDarkTheme,
-            setColorTheme,
-            { newValue -> showTopBar = newValue }
-        ) { newScreen ->
-            currentScreen = newScreen
+        Column {
+            Drawer(
+                paddingValues = it,
+                drawerState,
+                navController,
+                scope,
+                snackbarManager,
+                currentScreen,
+                cardsPerRow,
+                isAppInDarkTheme,
+                setColorTheme,
+                { newValue -> showTopBar = newValue }
+            ) { newScreen ->
+                currentScreen = newScreen
+            }
+
+            FloatingButtonPopup(showPopup = showAddPopup) {
+                showAddPopup = false
+            }
         }
     }
 }
