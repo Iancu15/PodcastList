@@ -1,34 +1,35 @@
 package com.podcastlist.ui.composables
 
-import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.podcastlist.api.model.Podcast
-import com.podcastlist.api.model.Podcasts
 
 @Composable
 fun PodcastCard(
     podcast: Podcast,
     modifier: Modifier,
-    cardsPerRow: Int
+    cardsPerRow: Int,
+    topRightIconImageVector: ImageVector,
+    topRightIconOnClick: (Podcast) -> Unit
 ) {
     val cardPadding = 16.dp.div(cardsPerRow)
     val titleSize = 40.sp.div(cardsPerRow)
@@ -50,6 +51,22 @@ fun PodcastCard(
                     .fillMaxWidth()
                     .fillMaxHeight()
             )
+            Row {
+                Spacer(
+                    Modifier.weight(1f)
+                )
+                Surface(
+                    modifier = Modifier.clip(RoundedCornerShape(100))
+                        .clickable {
+                            topRightIconOnClick(podcast)
+                        }
+                ) {
+                    Icon(
+                        topRightIconImageVector,
+                        contentDescription = null
+                    )
+                }
+            }
             Surface(
                 modifier = Modifier
                     .fillMaxHeight(infoHeight)
@@ -88,7 +105,9 @@ fun PodcastCardList(
     layoutPadding: Dp,
     cardHeight: Dp,
     cardsPerRow: Int,
-    podcasts: List<Podcast>
+    podcasts: List<Podcast>,
+    topRightIconImageVector: ImageVector = Icons.Default.Delete,
+    topRightIconOnClick: (Podcast) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -109,7 +128,9 @@ fun PodcastCardList(
                         modifier = Modifier
                             .height(cardHeight)
                             .fillParentMaxWidth(1F / cardsPerRow),
-                        cardsPerRow = cardsPerRow
+                        cardsPerRow = cardsPerRow,
+                        topRightIconImageVector = topRightIconImageVector,
+                        topRightIconOnClick = topRightIconOnClick
                     )
                 }
             }

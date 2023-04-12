@@ -33,15 +33,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun addPodcastToSubscribedList(id: String) {
+    private fun removePodcastFromSubscribedList(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             catchException {
-                spotifyService.subscribeToPodcasts(
+                spotifyService.unsubscribeFromPodcasts(
                     authorization = authorizationService.authorizationToken,
                     ids = id
                 )
 
-                Log.d("HomeViewModel", "Successfully added the podcast to the list!")
+                snackbarManager.showMessage("Successfully unsubscribed from podcast!")
             }
         }
     }
@@ -51,9 +51,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun subscribeToPodcast(id: String) {
-        callFunctionOrShowRetry("Couldn't add podcast to list") {
-            addPodcastToSubscribedList(id)
+    fun unsubscribeFromPodcast(id: String) {
+        callFunctionOrShowRetry("Couldn't remove podcast from list") {
+            removePodcastFromSubscribedList(id)
         }
     }
 }

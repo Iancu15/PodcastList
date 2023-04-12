@@ -27,4 +27,10 @@ interface SpotifyService {
         @Header("Authorization") authorization: String
     ) : SpotifyQuery
 
+    @DELETE("/v1/me/shows")
+    suspend fun unsubscribeFromPodcasts(
+        @Query("ids") ids: String,
+        @Header("Authorization") authorization: String
+    )
+
 }

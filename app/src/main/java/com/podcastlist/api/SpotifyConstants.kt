@@ -9,3 +9,4 @@ const val TOKEN_URL = "https://accounts.spotify.com/api/token"
 const val AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
 const val APP_AUTHORIZATION = "Authorization: Basic ZmQyNDQ5MDY2OWQ4NGI2MTlkZjViMjM1YmExN2UyMTc6ZDc5MWEzZjBlZDIxNDRkZGFiMGI4NmRmMDFhMTIyODU="
 const val RESPONSE_TYPE = "code"
+const val MAXIMUM_NUMBER_OF_IDS = 50

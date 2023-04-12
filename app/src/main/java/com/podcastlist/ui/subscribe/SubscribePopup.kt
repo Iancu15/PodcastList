@@ -1,10 +1,12 @@
 package com.podcastlist.ui.subscribe
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.podcastlist.R
+import com.podcastlist.api.MAXIMUM_NUMBER_OF_IDS
+import com.podcastlist.ui.composables.FormDivider
 import com.podcastlist.ui.composables.PodcastCardList
 
 @Composable
@@ -64,8 +68,11 @@ fun SearchResults(
                 layoutPadding = 8.dp,
                 cardHeight = 100.dp,
                 cardsPerRow = 3,
-                podcasts = viewModel.searchedPodcasts
-            )
+                podcasts = viewModel.searchedPodcasts,
+                topRightIconImageVector = Icons.Default.Add
+            ) { podcast ->
+                viewModel.selectPodcast(podcast)
+            }
         } else {
             Text(
                 text = "No search results",
@@ -76,8 +83,46 @@ fun SearchResults(
 }
 
 @Composable
-fun SelectedPodcasts() {
-    Text("selected")
+fun SelectedPodcasts(
+    viewModel: SubscribeViewModel = hiltViewModel()
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (viewModel.selectedPodcasts.isNotEmpty()) {
+            if (viewModel.selectedPodcasts.size <= MAXIMUM_NUMBER_OF_IDS) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.subscribeToSelectedPodcasts()
+                        },
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    ) {
+                        Text("Add selected podcasts")
+                    }
+                    Divider()
+                    PodcastCardList(
+                        layoutPadding = 8.dp,
+                        cardHeight = 100.dp,
+                        cardsPerRow = 3,
+                        podcasts = viewModel.selectedPodcasts
+                    ) { podcast ->
+                        viewModel.unselectPodcast(podcast)
+                    }
+                }
+            } else {
+                viewModel.snackbarManager.showMessage("Can't subscribe to more than $MAXIMUM_NUMBER_OF_IDS podcasts at once")
+            }
+        } else {
+            Text(
+                text = "No selected podcasts",
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
 }
 
 @Composable

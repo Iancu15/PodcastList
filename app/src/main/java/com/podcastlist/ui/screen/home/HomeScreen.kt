@@ -33,5 +33,7 @@ fun HomeScreen(
         cardHeight,
         cardsPerRow,
         viewModel.subscribedPodcasts.items.map { x -> x.show }
-    )
+    ) {
+        viewModel.unsubscribeFromPodcast(it.id)
+    }
 }

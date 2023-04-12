@@ -2,6 +2,7 @@ package com.podcastlist.ui.subscribe
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,7 @@ open class SubscribeViewModel @Inject constructor(
     private val spotifyService: SpotifyService
 ) : AuthorizationViewModel(authorizationService) {
     var searchedPodcasts: List<Podcast> by mutableStateOf(arrayListOf())
+    var selectedPodcasts: ArrayList<Podcast> = arrayListOf()
     var searchQuery by mutableStateOf("")
         private set
 
@@ -36,5 +38,39 @@ open class SubscribeViewModel @Inject constructor(
                 Log.d("HomeViewModel", "Fetched ${searchedPodcasts.size} searched podcasts")
             }
         }
+    }
+
+    fun selectPodcast(podcast: Podcast) {
+        selectedPodcasts.add(podcast)
+    }
+
+    fun unselectPodcast(podcast: Podcast) {
+        val result = selectedPodcasts.remove(podcast)
+        Log.d("SubscribeViewModel", "Was podcast unselected: $result")
+    }
+
+    private fun addPodcastsToSubscribedList(ids: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            catchException {
+                spotifyService.subscribeToPodcasts(
+                    authorization = authorizationService.authorizationToken,
+                    ids = ids
+                )
+
+                snackbarManager.showMessage("Successfully subscribed to the ${selectedPodcasts.size} podcasts!")
+            }
+        }
+    }
+
+    private fun subscribeToPodcasts(ids: String) {
+        callFunctionOrShowRetry("Couldn't add podcast to list") {
+            addPodcastsToSubscribedList(ids)
+        }
+    }
+
+    fun subscribeToSelectedPodcasts() {
+        val ids = selectedPodcasts.joinToString(",") { x -> x.id }
+        Log.d("SubscribeViewModel", "Selected podcasts ids: $ids")
+        subscribeToPodcasts(ids)
     }
 }
