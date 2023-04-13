@@ -84,7 +84,9 @@ fun SearchResults(
 
 @Composable
 fun SelectedPodcasts(
-    viewModel: SubscribeViewModel = hiltViewModel()
+    viewModel: SubscribeViewModel = hiltViewModel(),
+    reloadHomePage: () -> Unit,
+    reloadTab: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,6 +100,7 @@ fun SelectedPodcasts(
                     Button(
                         onClick = {
                             viewModel.subscribeToSelectedPodcasts()
+                            reloadHomePage()
                         },
                         modifier = Modifier.padding(vertical = 10.dp)
                     ) {
@@ -111,6 +114,7 @@ fun SelectedPodcasts(
                         podcasts = viewModel.selectedPodcasts
                     ) { podcast ->
                         viewModel.unselectPodcast(podcast)
+                        reloadTab()
                     }
                 }
             } else {
@@ -126,17 +130,23 @@ fun SelectedPodcasts(
 }
 
 @Composable
-fun SubscribePopupContent() {
+fun SubscribePopupContent(reloadHomePage: () -> Unit) {
     var tabState by remember { mutableStateOf(0) }
     Column {
         SubscribeTabs(
             state = tabState,
             modifyState = { newValue -> tabState = newValue }
         )
+
         if (tabState == 0) {
             SearchResults()
         } else {
-            SelectedPodcasts()
+            SelectedPodcasts(
+                reloadHomePage = reloadHomePage
+            ) {
+                tabState = 0
+                tabState = 1
+            }
         }
     }
 }

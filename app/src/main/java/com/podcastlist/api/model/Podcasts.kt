@@ -8,7 +8,7 @@ data class Shows(
     val items: List<Podcast>
 )
 data class Podcasts(
-    val items: List<PodcastsItem> = arrayListOf()
+    var items: List<PodcastsItem> = arrayListOf()
 )
 
 data class PodcastsItem (

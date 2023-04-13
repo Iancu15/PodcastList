@@ -58,6 +58,7 @@ open class SubscribeViewModel @Inject constructor(
                 )
 
                 snackbarManager.showMessage("Successfully subscribed to the ${selectedPodcasts.size} podcasts!")
+                selectedPodcasts = arrayListOf()
             }
         }
     }

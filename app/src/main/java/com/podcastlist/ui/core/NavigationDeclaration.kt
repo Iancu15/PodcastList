@@ -55,7 +55,9 @@ fun NavHostDeclaration(
             HomeScreen(
                 snackbarManager = snackbarManager,
                 cardsPerRow = cardsPerRow.toInt()
-            )
+            ) {
+                navController.navigate(homePath)
+            }
         }
 
         composable(settingsPath) {

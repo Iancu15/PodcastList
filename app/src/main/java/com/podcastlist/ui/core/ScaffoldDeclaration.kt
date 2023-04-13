@@ -45,6 +45,7 @@ fun ScaffoldDeclaration(
     var isGridViewDropdownMenuExpanded by remember { mutableStateOf(false) }
     var cardsPerRow by remember { mutableStateOf(2f) }
     var showAddPopup by remember { mutableStateOf(false) }
+    val homePath = stringResource(R.string.home_path)
 
     InitializeSnackbars(snackbarManager = snackbarManager)
     Scaffold(
@@ -141,7 +142,13 @@ fun ScaffoldDeclaration(
                 currentScreen = newScreen
             }
 
-            FloatingButtonPopup(showPopup = showAddPopup) {
+            FloatingButtonPopup(
+                showPopup = showAddPopup,
+                reloadHomePage = {
+                    navController.navigate(homePath)
+                    showAddPopup = false
+                }
+            ) {
                 showAddPopup = false
             }
         }

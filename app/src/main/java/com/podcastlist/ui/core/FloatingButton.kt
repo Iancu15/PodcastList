@@ -20,6 +20,7 @@ import com.podcastlist.ui.subscribe.SubscribePopupContent
 @Composable
 fun FloatingButtonPopup(
     showPopup: Boolean,
+    reloadHomePage: () -> Unit,
     onDismiss: () -> Unit
 ) {
     if (showPopup) {
@@ -34,7 +35,7 @@ fun FloatingButtonPopup(
                     .fillMaxHeight(0.6f)
                     .background(MaterialTheme.colors.background)
             ) {
-                SubscribePopupContent()
+                SubscribePopupContent(reloadHomePage)
             }
         }
     }

@@ -15,7 +15,8 @@ import com.podcastlist.ui.core.ProgressLine
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     snackbarManager: SnackbarManager,
-    cardsPerRow: Int
+    cardsPerRow: Int,
+    reload: () -> Unit
 ) {
     var progress by remember { mutableStateOf(0f) }
 
@@ -35,5 +36,6 @@ fun HomeScreen(
         viewModel.subscribedPodcasts.items.map { x -> x.show }
     ) {
         viewModel.unsubscribeFromPodcast(it.id)
+        reload()
     }
 }
