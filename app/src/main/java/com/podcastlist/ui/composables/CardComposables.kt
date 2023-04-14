@@ -29,7 +29,8 @@ fun PodcastCard(
     modifier: Modifier,
     cardsPerRow: Int,
     topRightIconImageVector: ImageVector,
-    topRightIconOnClick: (Podcast) -> Unit
+    topRightIconOnClick: (Podcast) -> Unit,
+    onImageClick: (Podcast) -> Unit
 ) {
     val cardPadding = 16.dp.div(cardsPerRow)
     val titleSize = 40.sp.div(cardsPerRow)
@@ -50,6 +51,9 @@ fun PodcastCard(
                     .clip(RoundedCornerShape(cornerRoundness, cornerRoundness, 0.dp, 0.dp))
                     .fillMaxWidth()
                     .fillMaxHeight()
+                    .clickable {
+                        onImageClick(podcast)
+                    }
             )
             Row {
                 Spacer(
@@ -106,6 +110,7 @@ fun PodcastCardList(
     cardHeight: Dp,
     cardsPerRow: Int,
     podcasts: List<Podcast>,
+    onImageClick: (Podcast) -> Unit = {},
     topRightIconImageVector: ImageVector = Icons.Default.Delete,
     topRightIconOnClick: (Podcast) -> Unit = {}
 ) {
@@ -130,7 +135,8 @@ fun PodcastCardList(
                             .fillParentMaxWidth(1F / cardsPerRow),
                         cardsPerRow = cardsPerRow,
                         topRightIconImageVector = topRightIconImageVector,
-                        topRightIconOnClick = topRightIconOnClick
+                        topRightIconOnClick = topRightIconOnClick,
+                        onImageClick = onImageClick
                     )
                 }
             }

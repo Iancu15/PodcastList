@@ -1,5 +1,6 @@
 package com.podcastlist.api
 
+import com.podcastlist.api.model.EpisodesQuery
 import com.podcastlist.api.model.Podcasts
 import com.podcastlist.api.model.SpotifyQuery
 import retrofit2.http.*
@@ -32,5 +33,13 @@ interface SpotifyService {
         @Query("ids") ids: String,
         @Header("Authorization") authorization: String
     )
+
+    @GET("/v1/shows/{id}/episodes")
+    suspend fun getEpisodesOfPodcast(
+        @Path("id") podcastId: String,
+        @Query("limit") limit: Int = 50,
+        @Query("offset") offset: Int,
+        @Header("Authorization") authorization: String
+    ) : EpisodesQuery
 
 }

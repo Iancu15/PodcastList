@@ -1,7 +1,10 @@
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -19,12 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.*
 import com.podcastlist.R
+import com.podcastlist.ui.composables.BasicPopup
 import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.core.Drawer
 import com.podcastlist.ui.core.FloatingButton
-import com.podcastlist.ui.core.FloatingButtonPopup
 import com.podcastlist.ui.menu.GridViewDropdownMenu
 import com.podcastlist.ui.snackbar.InitializeSnackbars
+import com.podcastlist.ui.subscribe.SubscribePopupContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
@@ -142,14 +146,18 @@ fun ScaffoldDeclaration(
                 currentScreen = newScreen
             }
 
-            FloatingButtonPopup(
+            BasicPopup(
                 showPopup = showAddPopup,
-                reloadHomePage = {
+                onDismiss = { showAddPopup = false },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .fillMaxHeight(0.6f)
+                    .background(MaterialTheme.colors.background)
+            ) {
+                SubscribePopupContent {
                     navController.navigate(homePath)
                     showAddPopup = false
                 }
-            ) {
-                showAddPopup = false
             }
         }
     }

@@ -18,6 +18,7 @@ import com.podcastlist.R
 import com.podcastlist.api.MAXIMUM_NUMBER_OF_IDS
 import com.podcastlist.ui.composables.FormDivider
 import com.podcastlist.ui.composables.PodcastCardList
+import kotlinx.coroutines.delay
 
 @Composable
 fun SearchField(
@@ -86,7 +87,7 @@ fun SearchResults(
 fun SelectedPodcasts(
     viewModel: SubscribeViewModel = hiltViewModel(),
     reloadHomePage: () -> Unit,
-    reloadTab: () -> Unit
+    modifyTabState: (Int) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,7 +115,8 @@ fun SelectedPodcasts(
                         podcasts = viewModel.selectedPodcasts
                     ) { podcast ->
                         viewModel.unselectPodcast(podcast)
-                        reloadTab()
+                        modifyTabState(0)
+                        modifyTabState(1)
                     }
                 }
             } else {
@@ -143,9 +145,8 @@ fun SubscribePopupContent(reloadHomePage: () -> Unit) {
         } else {
             SelectedPodcasts(
                 reloadHomePage = reloadHomePage
-            ) {
-                tabState = 0
-                tabState = 1
+            ) { newState ->
+                tabState = newState
             }
         }
     }
