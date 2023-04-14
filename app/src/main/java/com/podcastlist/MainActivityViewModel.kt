@@ -1,10 +1,13 @@
 package com.podcastlist
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.auth.AccountService
 import com.podcastlist.ui.screen.PodcastListViewModel
+import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.protocol.types.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,7 +18,8 @@ class MainActivityViewModel @Inject constructor(
     private val accountService: AccountService,
     private val authorizationService: AuthorizationService
 ) : PodcastListViewModel() {
-
+    var spotifyAppRemote = mutableStateOf<SpotifyAppRemote?>(null)
+    var playerState = mutableStateOf<PlayerState?>(null)
     fun isUserLoggedOut(): Boolean {
         return accountService.isUserLoggedOut()
     }

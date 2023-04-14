@@ -16,6 +16,7 @@ import com.podcastlist.ui.screen.edit_account.EditAccountScreen
 import com.podcastlist.ui.screen.login.LoginScreen
 import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
+import com.spotify.android.appremote.api.SpotifyAppRemote
 
 @Composable
 fun NavHostDeclaration(
@@ -27,7 +28,7 @@ fun NavHostDeclaration(
     setShowTopBar: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit,
     setIsUserLoggedOut: (Boolean) -> Unit,
-    viewModel: MainActivityViewModel = hiltViewModel()
+    viewModel: MainActivityViewModel
 ) {
     val loginPath = stringResource(R.string.login_path)
     val homePath = stringResource(R.string.home_path)
@@ -54,7 +55,8 @@ fun NavHostDeclaration(
             setIsUserLoggedOut(viewModel.isUserLoggedOut())
             HomeScreen(
                 snackbarManager = snackbarManager,
-                cardsPerRow = cardsPerRow.toInt()
+                cardsPerRow = cardsPerRow.toInt(),
+                mainActivityViewModel = viewModel
             ) {
                 navController.navigate(homePath)
             }

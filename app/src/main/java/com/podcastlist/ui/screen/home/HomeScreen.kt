@@ -14,15 +14,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.podcastlist.MainActivityViewModel
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.ui.composables.BasicPopup
 import com.podcastlist.ui.composables.PodcastCardList
 import com.podcastlist.ui.core.ProgressLine
 import com.podcastlist.ui.podcast.PodcastPopupContent
+import com.spotify.android.appremote.api.SpotifyAppRemote
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    mainActivityViewModel: MainActivityViewModel,
     snackbarManager: SnackbarManager,
     cardsPerRow: Int,
     reload: () -> Unit
@@ -48,7 +51,7 @@ fun HomeScreen(
             .fillMaxHeight(0.85f)
             .background(MaterialTheme.colors.background)
     ) {
-        PodcastPopupContent(podcast = focusedPodcast)
+        PodcastPopupContent(podcast = focusedPodcast, mainActivityViewModel)
     }
 
     PodcastCardList(

@@ -22,6 +22,7 @@ import com.podcastlist.R
 import com.podcastlist.Screen
 import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.screen.login.LoginDrawerItem
+import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ fun Drawer(
     isAppInDarkTheme: Boolean,
     setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
-    viewModel: MainActivityViewModel = hiltViewModel(),
+    viewModel: MainActivityViewModel,
     modifyScreen: (Screen) -> Unit
 ) {
     val loginPath = stringResource(R.string.login_path)
@@ -118,7 +119,8 @@ fun Drawer(
             setColorTheme,
             setShowTopBar,
             modifyScreen,
-            { newValue -> isUserLoggedOut = newValue }
+            { newValue -> isUserLoggedOut = newValue },
+            viewModel
         )
     }
 }

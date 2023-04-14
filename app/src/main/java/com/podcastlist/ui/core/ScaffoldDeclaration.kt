@@ -29,12 +29,14 @@ import com.podcastlist.ui.core.FloatingButton
 import com.podcastlist.ui.menu.GridViewDropdownMenu
 import com.podcastlist.ui.snackbar.InitializeSnackbars
 import com.podcastlist.ui.subscribe.SubscribePopupContent
+import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ScaffoldDeclaration(
     isAppInDarkTheme: Boolean,
+    mainActivityViewModel: MainActivityViewModel,
     setColorTheme: (Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -141,7 +143,8 @@ fun ScaffoldDeclaration(
                 cardsPerRow,
                 isAppInDarkTheme,
                 setColorTheme,
-                { newValue -> showTopBar = newValue }
+                { newValue -> showTopBar = newValue },
+                mainActivityViewModel
             ) { newScreen ->
                 currentScreen = newScreen
             }

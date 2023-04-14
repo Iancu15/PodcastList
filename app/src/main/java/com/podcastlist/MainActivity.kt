@@ -20,6 +20,7 @@ import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import com.spotify.protocol.types.Track
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ScaffoldDeclaration(isAppInDarkTheme) {
+                    ScaffoldDeclaration(isAppInDarkTheme, viewModel) {
                         newValue -> isAppInDarkTheme = newValue
                     }
                 }
@@ -59,7 +60,8 @@ class MainActivity : ComponentActivity() {
 
         builder.setScopes(arrayOf(
             "user-library-read",
-            "user-library-modify"
+            "user-library-modify",
+            "user-read-playback-position"
         ))
 
         val request = builder.build()
@@ -76,10 +78,12 @@ class MainActivity : ComponentActivity() {
 
         SpotifyAppRemote.connect(this, connectionParams, object : Connector.ConnectionListener {
             override fun onConnected(appRemote: SpotifyAppRemote) {
-                spotifyAppRemote = appRemote
+                viewModel.spotifyAppRemote.value = appRemote
+                viewModel.spotifyAppRemote.value!!.playerApi.subscribeToPlayerState().setEventCallback {
+                    viewModel.playerState.value = it
+                }
                 Log.d("MainActivity", "Connected! Yay!")
                 // Now you can start interacting with App Remote
-                //connected()
             }
 
             override fun onFailure(throwable: Throwable) {
