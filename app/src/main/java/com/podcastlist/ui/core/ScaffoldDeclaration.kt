@@ -29,7 +29,6 @@ import com.podcastlist.ui.core.FloatingButton
 import com.podcastlist.ui.menu.GridViewDropdownMenu
 import com.podcastlist.ui.snackbar.InitializeSnackbars
 import com.podcastlist.ui.subscribe.SubscribePopupContent
-import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
@@ -157,7 +156,7 @@ fun ScaffoldDeclaration(
                     .fillMaxHeight(0.6f)
                     .background(MaterialTheme.colors.background)
             ) {
-                SubscribePopupContent {
+                SubscribePopupContent(scope) {
                     navController.navigate(homePath)
                     showAddPopup = false
                 }

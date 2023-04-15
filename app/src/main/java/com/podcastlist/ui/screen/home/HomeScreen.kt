@@ -1,10 +1,12 @@
 package com.podcastlist.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -18,13 +20,15 @@ import com.podcastlist.MainActivityViewModel
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.ui.composables.BasicPopup
 import com.podcastlist.ui.composables.PodcastCardList
+import com.podcastlist.ui.composables.TopIconProperties
 import com.podcastlist.ui.core.ProgressLine
 import com.podcastlist.ui.podcast.PodcastPopupContent
-import com.spotify.android.appremote.api.SpotifyAppRemote
+import kotlinx.coroutines.*
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    scope: CoroutineScope,
     mainActivityViewModel: MainActivityViewModel,
     snackbarManager: SnackbarManager,
     cardsPerRow: Int,
@@ -41,7 +45,7 @@ fun HomeScreen(
     val cardHeight = 380.dp.div(cardsPerRow)
     val layoutPadding = 8.dp.div(cardsPerRow)
     var showPodcastPopup by remember { mutableStateOf(false) }
-    var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf())) }
+    var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf(), "")) }
     ProgressLine(progress = progress)
     BasicPopup(
         showPopup = showPodcastPopup,
@@ -62,9 +66,24 @@ fun HomeScreen(
         onImageClick = {
             focusedPodcast = it
             showPodcastPopup = true
+        },
+        fetchSubtitleText = { callback: (String) -> Unit, podcast: Podcast ->
+            scope.launch {
+                callback(viewModel.getNumberOfEpisodesWatchedAsync(podcast))
+            }
+        },
+        topRightIconProperties = TopIconProperties(true, Icons.Default.Add) {
+            viewModel.markWatchedEpisode(it) { episode ->
+                scope.launch(Dispatchers.IO) {
+                    mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(episode.uri)
+                    delay(10)
+                    mainActivityViewModel.spotifyAppRemote.value?.playerApi?.seekTo(episode.duration_ms * 2)
+                }
+            }
+        },
+        topLeftIconProperties = TopIconProperties(imageVector = Icons.Default.Delete) {
+            viewModel.unsubscribeFromPodcast(it.id)
+            reload()
         }
-    ) {
-        viewModel.unsubscribeFromPodcast(it.id)
-        reload()
-    }
+    )
 }

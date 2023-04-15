@@ -18,5 +18,6 @@ data class Podcast (
     val name: String,
     val id: String,
     val publisher: String,
-    val images: List<PodcastImage>
+    val images: List<PodcastImage>,
+    val description: String
     )

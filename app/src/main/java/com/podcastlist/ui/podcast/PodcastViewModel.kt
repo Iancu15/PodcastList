@@ -23,7 +23,6 @@ open class PodcastViewModel @Inject constructor(
     private val spotifyService: SpotifyService
 ) : AuthorizationViewModel(authorizationService) {
     var episodes: EpisodesQuery by mutableStateOf(EpisodesQuery())
-    var shouldRefetch: Boolean by mutableStateOf(false)
     var lazyListState: LazyListState by mutableStateOf(LazyListState())
     private fun fetchEpisodesOfPodcast(podcast: Podcast) {
         viewModelScope.launch(Dispatchers.IO) {

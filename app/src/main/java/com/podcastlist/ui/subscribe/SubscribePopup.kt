@@ -1,12 +1,12 @@
 package com.podcastlist.ui.subscribe
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,9 +16,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.podcastlist.R
 import com.podcastlist.api.MAXIMUM_NUMBER_OF_IDS
-import com.podcastlist.ui.composables.FormDivider
 import com.podcastlist.ui.composables.PodcastCardList
+import com.podcastlist.ui.composables.TopIconProperties
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchField(
@@ -70,10 +73,10 @@ fun SearchResults(
                 cardHeight = 100.dp,
                 cardsPerRow = 3,
                 podcasts = viewModel.searchedPodcasts,
-                topRightIconImageVector = Icons.Default.Add
-            ) { podcast ->
-                viewModel.selectPodcast(podcast)
-            }
+                topRightIconProperties = TopIconProperties(imageVector = Icons.Default.Add) { podcast ->
+                    viewModel.selectPodcast(podcast)
+                }
+            )
         } else {
             Text(
                 text = "No search results",
@@ -87,7 +90,8 @@ fun SearchResults(
 fun SelectedPodcasts(
     viewModel: SubscribeViewModel = hiltViewModel(),
     reloadHomePage: () -> Unit,
-    modifyTabState: (Int) -> Unit
+    scope: CoroutineScope,
+    modifyTabState: (Int) -> Unit,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,12 +116,16 @@ fun SelectedPodcasts(
                         layoutPadding = 8.dp,
                         cardHeight = 100.dp,
                         cardsPerRow = 3,
-                        podcasts = viewModel.selectedPodcasts
-                    ) { podcast ->
-                        viewModel.unselectPodcast(podcast)
-                        modifyTabState(0)
-                        modifyTabState(1)
-                    }
+                        podcasts = viewModel.selectedPodcasts,
+                        topRightIconProperties = TopIconProperties(imageVector = Icons.Default.Delete) { podcast ->
+                            viewModel.unselectPodcast(podcast)
+                            scope.launch(Dispatchers.Main) {
+                                modifyTabState(0)
+                                delay(1)
+                                modifyTabState(1)
+                            }
+                        }
+                    )
                 }
             } else {
                 viewModel.snackbarManager.showMessage("Can't subscribe to more than $MAXIMUM_NUMBER_OF_IDS podcasts at once")
@@ -132,7 +140,10 @@ fun SelectedPodcasts(
 }
 
 @Composable
-fun SubscribePopupContent(reloadHomePage: () -> Unit) {
+fun SubscribePopupContent(
+    scope: CoroutineScope,
+    reloadHomePage: () -> Unit
+) {
     var tabState by remember { mutableStateOf(0) }
     Column {
         SubscribeTabs(
@@ -144,6 +155,7 @@ fun SubscribePopupContent(reloadHomePage: () -> Unit) {
             SearchResults()
         } else {
             SelectedPodcasts(
+                scope = scope,
                 reloadHomePage = reloadHomePage
             ) { newState ->
                 tabState = newState

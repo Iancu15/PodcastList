@@ -17,9 +17,11 @@ import com.podcastlist.ui.screen.login.LoginScreen
 import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
 import com.spotify.android.appremote.api.SpotifyAppRemote
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun NavHostDeclaration(
+    scope: CoroutineScope,
     navController: NavHostController,
     snackbarManager: SnackbarManager,
     isAppInDarkTheme: Boolean,
@@ -54,6 +56,7 @@ fun NavHostDeclaration(
             modifyScreen(Screen.HOME)
             setIsUserLoggedOut(viewModel.isUserLoggedOut())
             HomeScreen(
+                scope = scope,
                 snackbarManager = snackbarManager,
                 cardsPerRow = cardsPerRow.toInt(),
                 mainActivityViewModel = viewModel

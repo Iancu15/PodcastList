@@ -33,18 +33,44 @@ fun PodcastPopupContent(
     podcast: Podcast,
     mainActivityViewModel: MainActivityViewModel
 ) {
+    var isTitleExpanded by remember { mutableStateOf(false) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.padding(bottom = 5.dp).fillMaxWidth()
     ) {
         Text(
             text = podcast.name,
-            modifier = Modifier.padding(vertical = 5.dp, horizontal = 10.dp),
+            modifier = Modifier.padding(top = 5.dp, start = 10.dp, end = 10.dp)
+                .clickable {
+                           isTitleExpanded = !isTitleExpanded
+                },
             fontSize = 30.sp,
             style = MaterialTheme.typography.caption,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        if (isTitleExpanded) {
+            Column {
+                Text(
+                    text = podcast.publisher,
+                    style = MaterialTheme.typography.subtitle1,
+                    fontSize = 15.sp,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+                Box(
+                    modifier = Modifier.padding(7.dp)
+                ) {
+                    Text(
+                        podcast.description,
+                        style = MaterialTheme.typography.body2,
+                        maxLines = 5,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
         Divider()
         ShowEpisodes(podcast = podcast, mainActivityViewModel = mainActivityViewModel)
     }
@@ -58,17 +84,14 @@ fun ShowEpisodes(
 ) {
     var expandedEpisodeId by remember { mutableStateOf("") }
     var progress by remember { mutableStateOf(0f) }
-
-    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.shouldRefetch) {
-        viewModel.shouldRefetch = false
+    var tabState by remember { mutableStateOf(0) }
+    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty()) {
         viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
         progress = 1.0f
     }
 
     ProgressLine(progress = progress)
     viewModel.lazyListState = rememberLazyListState()
-
-    var tabState by remember { mutableStateOf(0) }
     Column {
         PodcastListTabs(
             state = tabState,
@@ -86,8 +109,7 @@ fun ShowEpisodes(
                     ShowEpisode(
                         episode = it,
                         expandedEpisodeId = expandedEpisodeId,
-                        mainActivityViewModel = mainActivityViewModel,
-                        resetProgress = { progress = 0f }
+                        mainActivityViewModel = mainActivityViewModel
                     ) {
                         expandedEpisodeId = it
                     }
@@ -116,11 +138,9 @@ fun PodcastListTabs(
 
 @Composable
 fun ShowEpisode(
-    viewModel: PodcastViewModel = hiltViewModel(),
     episode: PodcastEpisode,
     mainActivityViewModel: MainActivityViewModel,
     expandedEpisodeId: String,
-    resetProgress: () -> Unit,
     changeExpandedEpisodeId: (String) -> Unit
 ) {
     val duration = episode.duration_ms.toDuration(DurationUnit.MILLISECONDS)
@@ -188,9 +208,9 @@ fun ShowEpisode(
                         if (!isCurrentlyPlaying) {
                             mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(episode.uri)
                         } else if (!wasPlayed) {
-                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.seekTo(episode.duration_ms)
-                            viewModel.shouldRefetch = true
-                            resetProgress()
+                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.seekTo(episode.duration_ms * 2)
+                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.pause()
+                            episode.resume_point.fully_played = true
                         }
                     }
                 ) {

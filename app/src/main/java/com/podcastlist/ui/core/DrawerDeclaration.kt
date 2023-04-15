@@ -112,6 +112,7 @@ fun Drawer(
         }
     ) {
         NavHostDeclaration(
+            scope,
             navController,
             snackbarManager,
             isAppInDarkTheme,
