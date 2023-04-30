@@ -67,7 +67,12 @@ class HomeViewModel @Inject constructor(
                 offset = 0
             )
 
-            val numberOfEpisodesWatched = episodes.items.map { it.resume_point.fully_played }.filter { it }.size
+            val numberOfEpisodesWatched = try {
+                episodes.items.map { it.resume_point.fully_played }.filter { it }.size
+            } catch (_: Exception) {
+                0
+            }
+
             val numberOfEpisodes = episodes.items.size
             Log.d("HomeViewModel", "Watched $numberOfEpisodesWatched for ${podcast.name}")
             return@withContext "Watched $numberOfEpisodesWatched/$numberOfEpisodes"

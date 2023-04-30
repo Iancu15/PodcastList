@@ -11,7 +11,9 @@ import com.podcastlist.api.SpotifyService
 import com.podcastlist.api.model.EpisodesQuery
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.api.model.Podcasts
+import com.podcastlist.db.DatabaseService
 import com.podcastlist.ui.AuthorizationViewModel
+import com.podcastlist.ui.screen.edit_account.EditAccountUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,10 +22,16 @@ import javax.inject.Inject
 @HiltViewModel
 open class PodcastViewModel @Inject constructor(
     private val authorizationService: AuthorizationService,
-    private val spotifyService: SpotifyService
+    private val spotifyService: SpotifyService,
+    private val databaseService: DatabaseService
 ) : AuthorizationViewModel(authorizationService) {
     var episodes: EpisodesQuery by mutableStateOf(EpisodesQuery())
     var lazyListState: LazyListState by mutableStateOf(LazyListState())
+    var note = mutableStateOf(String())
+
+    fun onNoteChange(newValue: String) {
+        note.value = newValue
+    }
     private fun fetchEpisodesOfPodcast(podcast: Podcast) {
         viewModelScope.launch(Dispatchers.IO) {
             catchException {
@@ -36,11 +44,24 @@ open class PodcastViewModel @Inject constructor(
                 Log.d("HomeViewModel", "Got ${episodes.items.size} episodes for ${podcast.name}")
             }
         }
+        snackbarManager.showMessage("hello")
     }
 
     fun fetchEpisodesOfPodcastWithSnackbar(podcast: Podcast) {
         callFunctionOrShowRetry("Your list of podcasts couldn't be retrieved") {
             fetchEpisodesOfPodcast(podcast = podcast)
+        }
+    }
+
+    fun storeTimestampNote(
+        timestamp: String,
+        note: String,
+        trackUri: String
+    ) {
+        viewModelScope.launch {
+            catchException {
+                databaseService.storeTimestampNote(timestamp, note, trackUri, snackbarManager)
+            }
         }
     }
 }

@@ -10,17 +10,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.podcastlist.MainActivityViewModel
+import com.podcastlist.R
 import com.podcastlist.api.model.PodcastEpisode
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.ui.core.ProgressLine
@@ -36,13 +38,16 @@ fun PodcastPopupContent(
     var isTitleExpanded by remember { mutableStateOf(false) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(bottom = 5.dp).fillMaxWidth()
+        modifier = Modifier
+            .padding(bottom = 5.dp)
+            .fillMaxWidth()
     ) {
         Text(
             text = podcast.name,
-            modifier = Modifier.padding(top = 5.dp, start = 10.dp, end = 10.dp)
+            modifier = Modifier
+                .padding(top = 5.dp, start = 10.dp, end = 10.dp)
                 .clickable {
-                           isTitleExpanded = !isTitleExpanded
+                    isTitleExpanded = !isTitleExpanded
                 },
             fontSize = 30.sp,
             style = MaterialTheme.typography.caption,
@@ -51,12 +56,16 @@ fun PodcastPopupContent(
         )
 
         if (isTitleExpanded) {
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(
                     text = podcast.publisher,
                     style = MaterialTheme.typography.subtitle1,
-                    fontSize = 15.sp,
-                    modifier = Modifier.padding(start = 10.dp)
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Box(
                     modifier = Modifier.padding(7.dp)
@@ -98,20 +107,24 @@ fun ShowEpisodes(
             modifyState = { newValue -> tabState = newValue }
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(4.dp)
-                .fillMaxWidth(),
-            state = viewModel.lazyListState
-        ) {
-            items(viewModel.episodes.items) {
-                if ((tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)) {
-                    ShowEpisode(
-                        episode = it,
-                        expandedEpisodeId = expandedEpisodeId,
-                        mainActivityViewModel = mainActivityViewModel
-                    ) {
-                        expandedEpisodeId = it
+        if (tabState == 2) {
+            EditCuePoints(mainActivityViewModel)
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxWidth(),
+                state = viewModel.lazyListState
+            ) {
+                items(viewModel.episodes.items) {
+                    if ((tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)) {
+                        ShowEpisode(
+                            episode = it,
+                            expandedEpisodeId = expandedEpisodeId,
+                            mainActivityViewModel = mainActivityViewModel
+                        ) {
+                            expandedEpisodeId = it
+                        }
                     }
                 }
             }
@@ -124,7 +137,7 @@ fun PodcastListTabs(
     state: Int,
     modifyState: (Int) -> Unit
 ) {
-    val tabNames = listOf("Backlog", "Watched episodes")
+    val tabNames = listOf("Backlog", "Watched episodes", "Edit cue points")
     TabRow(selectedTabIndex = state) {
         tabNames.forEachIndexed { index, title ->
             Tab(
@@ -149,7 +162,7 @@ fun ShowEpisode(
     }
 
     val wasPlayed = episode.resume_point.fully_played
-    val currentTrack by remember { mutableStateOf(mainActivityViewModel.playerState.value!!.track) }
+    val currentTrack = mainActivityViewModel.playerState.value!!.track
     val playbackPosition = mainActivityViewModel.playerState.value!!.playbackPosition
     val isCurrentlyPlaying = if (currentTrack == null) false else currentTrack.uri == episode.uri
     var playIcon = Icons.Default.PlayArrow
@@ -192,29 +205,51 @@ fun ShowEpisode(
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier
-                        .fillMaxWidth(0.9f),
+                        .fillMaxWidth(0.80f),
                     fontSize = 20.sp
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Surface(
                     shape = RoundedCornerShape(100),
                     color = playSurfaceColor,
-                    modifier = Modifier.clickable {
-                        if (mainActivityViewModel.spotifyAppRemote.value == null) {
-                            Log.d("ShowEpisode", "SpotifyAppRemote is null")
-                        }
+                    modifier = Modifier
+                        .clickable {
+                            if (mainActivityViewModel.spotifyAppRemote.value == null) {
+                                Log.d("ShowEpisode", "SpotifyAppRemote is null")
+                            }
 
-                        Log.d("ShowEpisode","Trying to play ${episode.name} with uri: ${episode.uri}")
-                        if (!isCurrentlyPlaying) {
-                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(episode.uri)
-                        } else if (!wasPlayed) {
-                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.seekTo(episode.duration_ms * 2)
-                            mainActivityViewModel.spotifyAppRemote.value?.playerApi?.pause()
-                            episode.resume_point.fully_played = true
+                            Log.d(
+                                "ShowEpisode",
+                                "Trying to play ${episode.name} with uri: ${episode.uri}"
+                            )
+                            if (!isCurrentlyPlaying) {
+                                mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(
+                                    episode.uri
+                                )
+                            } else if (!wasPlayed) {
+                                mainActivityViewModel.spotifyAppRemote.value?.playerApi?.seekTo(
+                                    episode.duration_ms * 2
+                                )
+                                mainActivityViewModel.spotifyAppRemote.value?.playerApi?.pause()
+                                episode.resume_point.fully_played = true
+                            }
                         }
-                    }
+                        .padding(end = 7.dp)
                 ) {
                     Icon(playIcon, null)
+                }
+                Surface(
+                    shape = RoundedCornerShape(100),
+                    color = MaterialTheme.colors.secondary,
+                    modifier = Modifier.clickable {
+                        //TODO
+                    }
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.edit_note_fill0_wght400_grad0_opsz48),
+                        null,
+                        modifier = Modifier.size(25.dp)
+                    )
                 }
             }
 

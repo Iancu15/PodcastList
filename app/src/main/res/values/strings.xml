@@ -36,4 +36,5 @@
     <string name="change_password_text">Change password</string>
     <string name="search_label">Search</string>
     <string name="search_placeholder">search podcast</string>
+    <string name="note_field_placeholder">Write a note for your timestamp</string>
 </resources>
