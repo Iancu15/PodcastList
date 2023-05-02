@@ -55,7 +55,12 @@ fun HomeScreen(
             .fillMaxHeight(0.85f)
             .background(MaterialTheme.colors.background)
     ) {
-        PodcastPopupContent(podcast = focusedPodcast, mainActivityViewModel)
+        PodcastPopupContent(
+            snackbarManager = snackbarManager,
+            podcast = focusedPodcast,
+            mainActivityViewModel,
+            scope
+        )
     }
 
     PodcastCardList(

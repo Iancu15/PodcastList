@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.*
 import com.podcastlist.R
@@ -27,6 +28,7 @@ import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.core.Drawer
 import com.podcastlist.ui.core.FloatingButton
 import com.podcastlist.ui.menu.GridViewDropdownMenu
+import com.podcastlist.ui.podcast.PodcastViewModel
 import com.podcastlist.ui.snackbar.InitializeSnackbars
 import com.podcastlist.ui.subscribe.SubscribePopupContent
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +38,7 @@ import kotlinx.coroutines.launch
 fun ScaffoldDeclaration(
     isAppInDarkTheme: Boolean,
     mainActivityViewModel: MainActivityViewModel,
+    podcastViewModel: PodcastViewModel = hiltViewModel(),
     setColorTheme: (Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)

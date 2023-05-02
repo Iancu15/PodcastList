@@ -26,14 +26,21 @@ import com.podcastlist.R
 import com.podcastlist.api.model.PodcastEpisode
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.ui.core.ProgressLine
+import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.subscribe.SubscribeTabs
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Composable
 fun PodcastPopupContent(
+    snackbarManager: SnackbarManager,
     podcast: Podcast,
-    mainActivityViewModel: MainActivityViewModel
+    mainActivityViewModel: MainActivityViewModel,
+    scope: CoroutineScope
 ) {
     var isTitleExpanded by remember { mutableStateOf(false) }
     Column(
@@ -81,20 +88,28 @@ fun PodcastPopupContent(
         }
 
         Divider()
-        ShowEpisodes(podcast = podcast, mainActivityViewModel = mainActivityViewModel)
+        ShowEpisodes(
+            snackbarManager,
+            podcast = podcast,
+            mainActivityViewModel = mainActivityViewModel,
+            scope = scope
+        )
     }
 }
 
 @Composable
 fun ShowEpisodes(
+    snackbarManager: SnackbarManager,
     viewModel: PodcastViewModel = hiltViewModel(),
     podcast: Podcast,
-    mainActivityViewModel: MainActivityViewModel
+    mainActivityViewModel: MainActivityViewModel,
+    scope: CoroutineScope
 ) {
     var expandedEpisodeId by remember { mutableStateOf("") }
     var progress by remember { mutableStateOf(0f) }
     var tabState by remember { mutableStateOf(0) }
     LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty()) {
+        viewModel.snackbarManager = snackbarManager
         viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
         progress = 1.0f
     }
@@ -108,7 +123,13 @@ fun ShowEpisodes(
         )
 
         if (tabState == 2) {
-            EditCuePoints(mainActivityViewModel)
+            EditCuePoints(mainActivityViewModel = mainActivityViewModel) {
+                scope.launch(Dispatchers.Main) {
+                    tabState = 0
+                    delay(1)
+                    tabState = 2
+                }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier

@@ -122,7 +122,7 @@ fun SelectedPodcasts(
                             scope.launch(Dispatchers.Main) {
                                 modifyTabState(0)
                                 delay(1)
-                                modifyTabState(1)
+                                modifyTabState(2)
                             }
                         }
                     )
