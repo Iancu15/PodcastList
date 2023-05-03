@@ -18,4 +18,8 @@ interface DatabaseService {
 
     suspend fun deleteTimestampNote(trackUri: String, timestamp: String)
 
+    suspend fun setMarkStatusOfEpisode(trackUri: String, marked: Boolean)
+
+    suspend fun getMarkStatusOfEpisode(trackUri: String): Task<DocumentSnapshot>
+
 }

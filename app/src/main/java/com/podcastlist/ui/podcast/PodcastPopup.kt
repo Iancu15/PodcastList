@@ -2,6 +2,7 @@ package com.podcastlist.ui.podcast
 
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -123,13 +124,7 @@ fun ShowEpisodes(
         )
 
         if (tabState == 2) {
-            EditCuePoints(mainActivityViewModel = mainActivityViewModel) {
-                scope.launch(Dispatchers.Main) {
-                    tabState = 0
-                    delay(10)
-                    tabState = 2
-                }
-            }
+            EditCuePoints(mainActivityViewModel = mainActivityViewModel)
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -172,6 +167,7 @@ fun PodcastListTabs(
 
 @Composable
 fun ShowEpisode(
+    viewModel: PodcastViewModel = hiltViewModel(),
     episode: PodcastEpisode,
     mainActivityViewModel: MainActivityViewModel,
     expandedEpisodeId: String,
@@ -203,6 +199,15 @@ fun ShowEpisode(
     val resumePointDuration = resumePoint.toDuration(DurationUnit.MILLISECONDS)
     val resumePointString = resumePointDuration.toComponents { minutes, seconds, _ ->
         String.format("%02d:%02d", minutes, seconds)
+    }
+
+    var isEpisodeMarked by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = viewModel.episodeThatHasLock.value, key2 = viewModel.isEpisodeMarked.value) {
+        viewModel.fetchEpisodeMarked(episode.uri)
+        if (viewModel.episodeThatHasLock.value == episode.uri) {
+            isEpisodeMarked = viewModel.isEpisodeMarked.value
+            viewModel.episodeThatHasLock.value = ""
+        }
     }
 
     Column(
@@ -259,17 +264,29 @@ fun ShowEpisode(
                 ) {
                     Icon(playIcon, null)
                 }
-                Surface(
-                    shape = RoundedCornerShape(100),
-                    color = MaterialTheme.colors.secondary,
-                    modifier = Modifier.clickable {
-                        //TODO
-                    }
-                ) {
+                if (isEpisodeMarked) {
                     Icon(
-                        painterResource(id = R.drawable.edit_note_fill0_wght400_grad0_opsz48),
+                        painterResource(id = R.drawable.stars_fill0_wght400_grad0_opsz48),
                         null,
-                        modifier = Modifier.size(25.dp)
+                        modifier = Modifier
+                            .clickable {
+                                isEpisodeMarked = false
+                                viewModel.setMarkStatusOfEpisode(episode.uri, false)
+                            }
+                            .size(30.dp),
+                        tint = MaterialTheme.colors.primary
+                    )
+                } else {
+                    Icon(
+                        painterResource(id = R.drawable.star_fill0_wght400_grad0_opsz48),
+                        null,
+                        modifier = Modifier
+                            .clickable {
+                                isEpisodeMarked = true
+                                viewModel.setMarkStatusOfEpisode(episode.uri, true)
+                            }
+                            .size(30.dp),
+                        tint = MaterialTheme.colors.primary
                     )
                 }
             }
@@ -308,6 +325,8 @@ fun ShowEpisode(
         }
         if (isCurrentlyPlaying) {
             Divider(color = MaterialTheme.colors.primary)
+        } else if (isEpisodeMarked) {
+            Divider(color = MaterialTheme.colors.primaryVariant)
         } else {
             Divider()
         }

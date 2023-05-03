@@ -19,6 +19,8 @@ import com.podcastlist.ui.screen.edit_account.EditAccountUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +34,9 @@ open class PodcastViewModel @Inject constructor(
     var note = mutableStateOf(String())
     var timestampNotes: List<TimestampNote> by mutableStateOf(arrayListOf())
     var editNote = mutableStateOf(String())
+    var isEpisodeMarked = mutableStateOf(false)
+    var episodeThatHasLock = mutableStateOf("")
+    var lock = ReentrantLock()
     fun onNoteChange(newValue: String) {
         note.value = newValue
     }
@@ -87,6 +92,33 @@ open class PodcastViewModel @Inject constructor(
                     }
                     .addOnFailureListener {
                         Log.d("DatabaseServiceImpl", "Failed to get timestamp notes: $it")
+                    }
+            }
+        }
+    }
+
+    fun setMarkStatusOfEpisode(trackUri: String, marked: Boolean) {
+        viewModelScope.launch {
+            catchException {
+                databaseService.setMarkStatusOfEpisode(trackUri, marked)
+            }
+        }
+    }
+
+    fun fetchEpisodeMarked(trackUri: String) {
+        viewModelScope.launch {
+            lock.lock()
+            catchException {
+                databaseService.getMarkStatusOfEpisode(trackUri)
+                    .addOnSuccessListener { result ->
+                        episodeThatHasLock.value = trackUri
+                        val marked = if (result.data == null) false else result.data?.get("marked") as Boolean
+                        isEpisodeMarked.value = marked
+                        lock.unlock()
+                    }
+                    .addOnFailureListener {
+                        Log.d("DatabaseServiceImpl", "Failed to get mark status: $it")
+                        lock.unlock()
                     }
             }
         }

@@ -135,8 +135,7 @@ fun DisplayTimestampNotes(
 @Composable
 fun EditCuePoints(
     mainActivityViewModel: MainActivityViewModel,
-    viewModel: PodcastViewModel = hiltViewModel(),
-    reloadTab: () -> Unit
+    viewModel: PodcastViewModel = hiltViewModel()
 ) {
     val currentTrack = mainActivityViewModel.playerState.value!!.track
     val isPaused = mainActivityViewModel.playerState.value!!.isPaused
