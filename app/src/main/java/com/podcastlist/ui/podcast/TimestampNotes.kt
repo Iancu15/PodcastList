@@ -91,9 +91,7 @@ fun DisplayTimestampNotes(
                             null,
                             modifier = Modifier
                                 .clickable {
-                                    val timestamp =
-                                        mainActivityViewModel.playerState.value!!.playbackPosition.toString()
-                                    viewModel.deleteTimestampNote(trackUri, timestamp)
+                                    viewModel.deleteTimestampNote(trackUri, it.timestamp.toString())
                                     reloadTab()
                                 }
                                 .size(25.dp)
@@ -105,7 +103,11 @@ fun DisplayTimestampNotes(
                                 null,
                                 modifier = Modifier
                                     .clickable {
-                                        viewModel.storeOrEditTimestampNote(it.timestamp.toString(), editNote, trackUri)
+                                        viewModel.storeOrEditTimestampNote(
+                                            it.timestamp.toString(),
+                                            editNote,
+                                            trackUri
+                                        )
                                         timestampNoteBeingEdited = -1
                                         reloadTab()
                                     }
@@ -140,7 +142,8 @@ fun EditCuePoints(
     val isPaused = mainActivityViewModel.playerState.value!!.isPaused
     val note by viewModel.note
     var progress by remember { mutableStateOf(0f) }
-    val trackUri = mainActivityViewModel.playerState.value!!.track.uri
+    val currTrack = mainActivityViewModel.playerState.value!!.track
+    val trackUri = if (currTrack == null) "" else currTrack.uri
     LaunchedEffect(key1 = viewModel.timestampNotes.isNotEmpty(), key2 = trackUri) {
         val track = mainActivityViewModel.playerState.value!!.track
         if (track != null) {
@@ -190,14 +193,15 @@ fun EditCuePoints(
                     onClick = {
                         val timestamp = mainActivityViewModel.playerState.value!!.playbackPosition.toString()
                         viewModel.storeOrEditTimestampNote(timestamp, note, trackUri)
-                        reloadTab()
+                        viewModel.fetchTimestampNotes(trackUri)
                     }
                 ) {
                     Text("Add note")
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))
-            DisplayTimestampNotes(reloadTab = reloadTab, mainActivityViewModel = mainActivityViewModel)
+            DisplayTimestampNotes(reloadTab = { viewModel.fetchTimestampNotes(trackUri) },
+                mainActivityViewModel = mainActivityViewModel)
         } else {
             Text(
                 text = "Play the episode you want to track",

@@ -126,7 +126,7 @@ fun ShowEpisodes(
             EditCuePoints(mainActivityViewModel = mainActivityViewModel) {
                 scope.launch(Dispatchers.Main) {
                     tabState = 0
-                    delay(1)
+                    delay(10)
                     tabState = 2
                 }
             }
