@@ -90,11 +90,37 @@ class DatabaseServiceImpl @Inject constructor(
             }
     }
 
-    override suspend fun getMarkStatusOfEpisode(trackUri: String): Task<DocumentSnapshot> {
+    override suspend fun getEpisodeDocument(trackUri: String): Task<DocumentSnapshot> {
         return db.collection("users")
             .document(accountService.currentUserId)
             .collection("tracks")
             .document(trackUri)
+            .get()
+    }
+
+    override suspend fun setCurrentEpisodesPage(podcastId: String, page: Int) {
+        val data = hashMapOf(
+            "page" to page
+        )
+
+        db.collection("users")
+            .document(accountService.currentUserId)
+            .collection("podcasts")
+            .document(podcastId)
+            .set(data, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("DatabaseServiceImpl", "Updated page number of $podcastId to $page")
+            }
+            .addOnFailureListener {
+                Log.d("DatabaseServiceImpl", "Failed to update page number: $it")
+            }
+    }
+
+    override suspend fun getPodcastDocument(podcastId: String): Task<DocumentSnapshot> {
+        return db.collection("users")
+            .document(accountService.currentUserId)
+            .collection("podcasts")
+            .document(podcastId)
             .get()
     }
 

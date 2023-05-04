@@ -40,8 +40,7 @@ import kotlin.time.toDuration
 fun PodcastPopupContent(
     snackbarManager: SnackbarManager,
     podcast: Podcast,
-    mainActivityViewModel: MainActivityViewModel,
-    scope: CoroutineScope
+    mainActivityViewModel: MainActivityViewModel
 ) {
     var isTitleExpanded by remember { mutableStateOf(false) }
     Column(
@@ -92,8 +91,7 @@ fun PodcastPopupContent(
         ShowEpisodes(
             snackbarManager,
             podcast = podcast,
-            mainActivityViewModel = mainActivityViewModel,
-            scope = scope
+            mainActivityViewModel = mainActivityViewModel
         )
     }
 }
@@ -103,16 +101,21 @@ fun ShowEpisodes(
     snackbarManager: SnackbarManager,
     viewModel: PodcastViewModel = hiltViewModel(),
     podcast: Podcast,
-    mainActivityViewModel: MainActivityViewModel,
-    scope: CoroutineScope
+    mainActivityViewModel: MainActivityViewModel
 ) {
     var expandedEpisodeId by remember { mutableStateOf("") }
     var progress by remember { mutableStateOf(0f) }
     var tabState by remember { mutableStateOf(0) }
-    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty()) {
+    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.episodesPageNumber.value) {
         viewModel.snackbarManager = snackbarManager
+        viewModel.currPodcastId.value = podcast.id
         viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
         progress = 1.0f
+    }
+
+    LaunchedEffect(key1 = viewModel.currPodcastId.value) {
+        viewModel.snackbarManager = snackbarManager
+        viewModel.fetchEpisodesPageNumber(podcast.id)
     }
 
     ProgressLine(progress = progress)
@@ -129,7 +132,8 @@ fun ShowEpisodes(
             LazyColumn(
                 modifier = Modifier
                     .padding(4.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .weight(1f),
                 state = viewModel.lazyListState
             ) {
                 items(viewModel.episodes.items) {
@@ -138,12 +142,45 @@ fun ShowEpisodes(
                             episode = it,
                             expandedEpisodeId = expandedEpisodeId,
                             mainActivityViewModel = mainActivityViewModel
-                        ) {
-                            expandedEpisodeId = it
+                        ) { str ->
+                            expandedEpisodeId = str
                         }
                     }
                 }
             }
+
+            EpisodesPageTabs(
+                numberOfEpisodes = podcast.total_episodes,
+                state = viewModel.episodesPageNumber.value,
+                modifyState = { newValue ->
+                    viewModel.episodesPageNumber.value = newValue
+                    viewModel.setEpisodePageNumber(podcast.id, viewModel.episodesPageNumber.value)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun EpisodesPageTabs(
+    numberOfEpisodes: Int,
+    state: Int,
+    modifyState: (Int) -> Unit
+) {
+    val numberOfPages = (numberOfEpisodes / 50) + 1
+    var stateValue = state
+    if (state >= numberOfPages) {
+        stateValue = 0
+    }
+
+    TabRow(selectedTabIndex = stateValue) {
+        for (page in 1..numberOfPages) {
+            val index = page - 1
+            Tab(
+                text = { Text(page.toString()) },
+                selected = state == index,
+                onClick = { modifyState(index) }
+            )
         }
     }
 }
@@ -159,7 +196,9 @@ fun PodcastListTabs(
             Tab(
                 text = { Text(title) },
                 selected = state == index,
-                onClick = { modifyState(index) }
+                onClick = {
+                    modifyState(index)
+                }
             )
         }
     }

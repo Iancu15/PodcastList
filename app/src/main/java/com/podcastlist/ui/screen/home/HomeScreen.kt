@@ -45,7 +45,7 @@ fun HomeScreen(
     val cardHeight = 380.dp.div(cardsPerRow)
     val layoutPadding = 8.dp.div(cardsPerRow)
     var showPodcastPopup by remember { mutableStateOf(false) }
-    var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf(), "")) }
+    var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf(), "", 0)) }
     ProgressLine(progress = progress)
     BasicPopup(
         showPopup = showPodcastPopup,
@@ -58,8 +58,7 @@ fun HomeScreen(
         PodcastPopupContent(
             snackbarManager = snackbarManager,
             podcast = focusedPodcast,
-            mainActivityViewModel,
-            scope
+            mainActivityViewModel
         )
     }
 

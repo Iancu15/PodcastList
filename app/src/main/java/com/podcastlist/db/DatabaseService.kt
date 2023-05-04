@@ -20,6 +20,10 @@ interface DatabaseService {
 
     suspend fun setMarkStatusOfEpisode(trackUri: String, marked: Boolean)
 
-    suspend fun getMarkStatusOfEpisode(trackUri: String): Task<DocumentSnapshot>
+    suspend fun getEpisodeDocument(trackUri: String): Task<DocumentSnapshot>
+
+    suspend fun setCurrentEpisodesPage(podcastId: String, page: Int)
+
+    suspend fun getPodcastDocument(podcastId: String): Task<DocumentSnapshot>
 
 }

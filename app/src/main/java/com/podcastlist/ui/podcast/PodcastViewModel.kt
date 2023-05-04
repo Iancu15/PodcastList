@@ -36,6 +36,8 @@ open class PodcastViewModel @Inject constructor(
     var editNote = mutableStateOf(String())
     var isEpisodeMarked = mutableStateOf(false)
     var episodeThatHasLock = mutableStateOf("")
+    var episodesPageNumber = mutableStateOf(0)
+    var currPodcastId = mutableStateOf("")
     var lock = ReentrantLock()
     fun onNoteChange(newValue: String) {
         note.value = newValue
@@ -47,10 +49,11 @@ open class PodcastViewModel @Inject constructor(
     private fun fetchEpisodesOfPodcast(podcast: Podcast) {
         viewModelScope.launch(Dispatchers.IO) {
             catchException {
+                val offset = episodesPageNumber.value * 50
                 episodes = spotifyService.getEpisodesOfPodcast(
                     authorization = authorizationService.authorizationToken,
                     podcastId = podcast.id,
-                    offset = 0
+                    offset = offset
                 )
 
                 Log.d("HomeViewModel", "Got ${episodes.items.size} episodes for ${podcast.name}")
@@ -107,10 +110,10 @@ open class PodcastViewModel @Inject constructor(
 
     fun fetchEpisodeMarked(trackUri: String) {
         viewModelScope.launch {
-            lock.lock()
             catchException {
-                databaseService.getMarkStatusOfEpisode(trackUri)
+                databaseService.getEpisodeDocument(trackUri)
                     .addOnSuccessListener { result ->
+                        lock.lock()
                         episodeThatHasLock.value = trackUri
                         val marked = if (result.data == null) false else result.data?.get("marked") as Boolean
                         isEpisodeMarked.value = marked
@@ -118,8 +121,30 @@ open class PodcastViewModel @Inject constructor(
                     }
                     .addOnFailureListener {
                         Log.d("DatabaseServiceImpl", "Failed to get mark status: $it")
-                        lock.unlock()
                     }
+            }
+        }
+    }
+
+    fun fetchEpisodesPageNumber(podcastId: String) {
+        viewModelScope.launch {
+            catchException {
+                databaseService.getPodcastDocument(podcastId)
+                    .addOnSuccessListener { result ->
+                        val page = if (result.data == null) 0 else result.data?.get("page") as Long
+                        episodesPageNumber.value = page.toInt()
+                    }
+                    .addOnFailureListener {
+                        Log.d("DatabaseServiceImpl", "Failed to get mark status: $it")
+                    }
+            }
+        }
+    }
+
+    fun setEpisodePageNumber(podcastId: String, page: Int) {
+        viewModelScope.launch {
+            catchException {
+                databaseService.setCurrentEpisodesPage(podcastId, page)
             }
         }
     }

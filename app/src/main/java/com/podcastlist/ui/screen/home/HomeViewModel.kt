@@ -73,9 +73,8 @@ class HomeViewModel @Inject constructor(
                 0
             }
 
-            val numberOfEpisodes = episodes.items.size
             Log.d("HomeViewModel", "Watched $numberOfEpisodesWatched for ${podcast.name}")
-            return@withContext "Watched $numberOfEpisodesWatched/$numberOfEpisodes"
+            return@withContext "Watched $numberOfEpisodesWatched/${podcast.total_episodes}"
         }
     }
 
