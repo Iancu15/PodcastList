@@ -26,4 +26,6 @@ interface DatabaseService {
 
     suspend fun getPodcastDocument(podcastId: String): Task<DocumentSnapshot>
 
+    suspend fun setNumberOfEpisodesWatched(podcastId: String, numberOfEpisodesWatched: Int)
+
 }

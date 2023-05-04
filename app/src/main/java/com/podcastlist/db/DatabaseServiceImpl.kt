@@ -124,4 +124,22 @@ class DatabaseServiceImpl @Inject constructor(
             .get()
     }
 
+    override suspend fun setNumberOfEpisodesWatched(podcastId: String, numberOfEpisodesWatched: Int) {
+        val data = hashMapOf(
+            "numberOfEpisodesWatched" to numberOfEpisodesWatched
+        )
+
+        db.collection("users")
+            .document(accountService.currentUserId)
+            .collection("podcasts")
+            .document(podcastId)
+            .set(data, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("DatabaseServiceImpl", "Updated no. eps. watched of $podcastId to $numberOfEpisodesWatched")
+            }
+            .addOnFailureListener {
+                Log.d("DatabaseServiceImpl", "Failed to update no. eps watched: $it")
+            }
+    }
+
 }

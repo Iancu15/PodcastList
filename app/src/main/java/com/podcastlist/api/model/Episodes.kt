@@ -1,7 +1,7 @@
 package com.podcastlist.api.model
 
 data class EpisodesQuery(
-    val items: List<PodcastEpisode> = arrayListOf()
+    var items: List<PodcastEpisode> = arrayListOf()
 )
 
 data class PodcastEpisode(

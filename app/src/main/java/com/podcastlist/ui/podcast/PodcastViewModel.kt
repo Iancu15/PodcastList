@@ -56,6 +56,7 @@ open class PodcastViewModel @Inject constructor(
                     offset = offset
                 )
 
+                episodes.items = episodes.items.sortedBy { it.release_date }
                 Log.d("HomeViewModel", "Got ${episodes.items.size} episodes for ${podcast.name}")
             }
         }

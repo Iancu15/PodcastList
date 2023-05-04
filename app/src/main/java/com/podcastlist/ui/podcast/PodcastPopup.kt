@@ -40,7 +40,8 @@ import kotlin.time.toDuration
 fun PodcastPopupContent(
     snackbarManager: SnackbarManager,
     podcast: Podcast,
-    mainActivityViewModel: MainActivityViewModel
+    mainActivityViewModel: MainActivityViewModel,
+    scope: CoroutineScope
 ) {
     var isTitleExpanded by remember { mutableStateOf(false) }
     Column(
@@ -91,7 +92,8 @@ fun PodcastPopupContent(
         ShowEpisodes(
             snackbarManager,
             podcast = podcast,
-            mainActivityViewModel = mainActivityViewModel
+            mainActivityViewModel = mainActivityViewModel,
+            scope = scope
         )
     }
 }
@@ -101,6 +103,7 @@ fun ShowEpisodes(
     snackbarManager: SnackbarManager,
     viewModel: PodcastViewModel = hiltViewModel(),
     podcast: Podcast,
+    scope: CoroutineScope,
     mainActivityViewModel: MainActivityViewModel
 ) {
     var expandedEpisodeId by remember { mutableStateOf("") }
@@ -141,7 +144,8 @@ fun ShowEpisodes(
                         ShowEpisode(
                             episode = it,
                             expandedEpisodeId = expandedEpisodeId,
-                            mainActivityViewModel = mainActivityViewModel
+                            mainActivityViewModel = mainActivityViewModel,
+                            scope = scope
                         ) { str ->
                             expandedEpisodeId = str
                         }
@@ -210,6 +214,7 @@ fun ShowEpisode(
     episode: PodcastEpisode,
     mainActivityViewModel: MainActivityViewModel,
     expandedEpisodeId: String,
+    scope: CoroutineScope,
     changeExpandedEpisodeId: (String) -> Unit
 ) {
     val duration = episode.duration_ms.toDuration(DurationUnit.MILLISECONDS)
