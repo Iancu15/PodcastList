@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.podcastlist.*
 import com.podcastlist.R
@@ -38,7 +39,6 @@ import kotlinx.coroutines.launch
 fun ScaffoldDeclaration(
     isAppInDarkTheme: Boolean,
     mainActivityViewModel: MainActivityViewModel,
-    podcastViewModel: PodcastViewModel = hiltViewModel(),
     setColorTheme: (Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -129,7 +129,7 @@ fun ScaffoldDeclaration(
                 )
         },
         floatingActionButton = {
-            if (currentScreen == Screen.HOME && !showAddPopup) {
+            if (currentScreen == Screen.HOME && !showAddPopup && mainActivityViewModel.isInternetAvailable.value) {
                 FloatingButton { showAddPopup = true }
             }
         }

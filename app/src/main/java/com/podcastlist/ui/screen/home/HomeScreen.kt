@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -36,59 +37,63 @@ fun HomeScreen(
     cardsPerRow: Int,
     reload: () -> Unit
 ) {
-    var progress by remember { mutableStateOf(0f) }
-    viewModel.snackbarManager = snackbarManager
+    if (mainActivityViewModel.isInternetAvailable.value) {
+        var progress by remember { mutableStateOf(0f) }
+        viewModel.snackbarManager = snackbarManager
 
-    LaunchedEffect(key1 = viewModel.subscribedPodcasts.items.isNotEmpty()) {
-        viewModel.fetchSubscribedPodcastsWithSnackbar()
-        progress = 1.0f
-    }
-
-    val cardHeight = 380.dp.div(cardsPerRow)
-    val layoutPadding = 8.dp.div(cardsPerRow)
-    var showPodcastPopup by remember { mutableStateOf(false) }
-    var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf(), "", 0)) }
-    ProgressLine(progress = progress)
-    BasicPopup(
-        showPopup = showPodcastPopup,
-        onDismiss = { showPodcastPopup = false },
-        modifier = Modifier
-            .fillMaxWidth(0.85f)
-            .fillMaxHeight(0.85f)
-            .background(MaterialTheme.colors.background)
-    ) {
-        PodcastPopupContent(
-            snackbarManager = snackbarManager,
-            podcast = focusedPodcast,
-            mainActivityViewModel,
-            scope
-        )
-    }
-
-    PodcastCardList(
-        layoutPadding = layoutPadding,
-        cardHeight = cardHeight,
-        cardsPerRow = cardsPerRow,
-        podcasts = viewModel.subscribedPodcasts.items.map { x -> x.show },
-        onImageClick = {
-            focusedPodcast = it
-            showPodcastPopup = true
-        },
-        fetchSubtitleText = { callback: (String) -> Unit, podcast: Podcast ->
-            scope.launch {
-                callback(viewModel.getNumberOfEpisodesWatchedAsync(podcast))
-            }
-        },
-        topRightIconProperties = TopIconProperties(true, Icons.Default.PlayArrow) {
-            viewModel.markWatchedEpisode(it) { episode ->
-                scope.launch(Dispatchers.IO) {
-                    mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(episode.uri)
-                }
-            }
-        },
-        topLeftIconProperties = TopIconProperties(imageVector = Icons.Default.Delete) {
-            viewModel.unsubscribeFromPodcast(it.id)
-            reload()
+        LaunchedEffect(key1 = viewModel.subscribedPodcasts.items.isNotEmpty()) {
+            viewModel.fetchSubscribedPodcastsWithSnackbar()
+            progress = 1.0f
         }
-    )
+
+        val cardHeight = 380.dp.div(cardsPerRow)
+        val layoutPadding = 8.dp.div(cardsPerRow)
+        var showPodcastPopup by remember { mutableStateOf(false) }
+        var focusedPodcast by remember { mutableStateOf(Podcast("", "", "", arrayListOf(), "", 0)) }
+        ProgressLine(progress = progress)
+        BasicPopup(
+            showPopup = showPodcastPopup,
+            onDismiss = { showPodcastPopup = false },
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .fillMaxHeight(0.85f)
+                .background(MaterialTheme.colors.background)
+        ) {
+            PodcastPopupContent(
+                snackbarManager = snackbarManager,
+                podcast = focusedPodcast,
+                mainActivityViewModel,
+                scope
+            )
+        }
+
+        PodcastCardList(
+            layoutPadding = layoutPadding,
+            cardHeight = cardHeight,
+            cardsPerRow = cardsPerRow,
+            podcasts = viewModel.subscribedPodcasts.items.map { x -> x.show },
+            onImageClick = {
+                focusedPodcast = it
+                showPodcastPopup = true
+            },
+            fetchSubtitleText = { callback: (String) -> Unit, podcast: Podcast ->
+                scope.launch {
+                    callback(viewModel.getNumberOfEpisodesWatchedAsync(podcast))
+                }
+            },
+            topRightIconProperties = TopIconProperties(true, Icons.Default.PlayArrow) {
+                viewModel.markWatchedEpisode(it) { episode ->
+                    scope.launch(Dispatchers.IO) {
+                        mainActivityViewModel.spotifyAppRemote.value?.playerApi?.play(episode.uri)
+                    }
+                }
+            },
+            topLeftIconProperties = TopIconProperties(imageVector = Icons.Default.Delete) {
+                viewModel.unsubscribeFromPodcast(it.id)
+                reload()
+            }
+        )
+    } else {
+        Text("Internet isn't available folks!")
+    }
 }

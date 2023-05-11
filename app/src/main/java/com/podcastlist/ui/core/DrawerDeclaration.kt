@@ -62,22 +62,26 @@ fun Drawer(
             Column(
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 10.dp, end = 10.dp)
             ) {
-                if (isUserLoggedOut) {
-                    LoginDrawerItem(
-                        drawerState = drawerState,
-                        scope = scope,
-                        currentScreen = currentScreen
-                    ) {
-                        navController.navigate(loginPath)
-                    }
-                } else {
-                    EmailDropdownButton(
-                        navigateToEditAccount = { navController.navigate(editAccountPath) },
-                        closeDrawer = { scope.launch(Dispatchers.Main) {
-                            drawerState.close()
-                        } }
-                    ) {
-                            newValue -> isUserLoggedOut = newValue
+                if (viewModel.isInternetAvailable.value) {
+                    if (isUserLoggedOut) {
+                        LoginDrawerItem(
+                            drawerState = drawerState,
+                            scope = scope,
+                            currentScreen = currentScreen
+                        ) {
+                            navController.navigate(loginPath)
+                        }
+                    } else {
+                        EmailDropdownButton(
+                            navigateToEditAccount = { navController.navigate(editAccountPath) },
+                            closeDrawer = {
+                                scope.launch(Dispatchers.Main) {
+                                    drawerState.close()
+                                }
+                            }
+                        ) { newValue ->
+                            isUserLoggedOut = newValue
+                        }
                     }
                 }
 

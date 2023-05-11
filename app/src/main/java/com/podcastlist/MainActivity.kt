@@ -2,6 +2,7 @@ package com.podcastlist
 
 import ScaffoldDeclaration
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -16,15 +17,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.podcastlist.bcastreceiver.InternetStatusReceiver
 import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
-import com.spotify.protocol.types.Track
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
+
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val clientId = "fd24490669d84b619df5b235ba17e217"
@@ -49,6 +52,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+        val internetStatusReceiver = InternetStatusReceiver(viewModel)
+        this.registerReceiver(internetStatusReceiver, IntentFilter())
     }
 
     private fun requestAuthorization() {

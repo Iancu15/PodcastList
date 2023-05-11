@@ -139,15 +139,17 @@ fun ShowEpisodes(
                     .weight(1f),
                 state = viewModel.lazyListState
             ) {
-                items(viewModel.episodes.items) {
-                    if ((tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)) {
-                        ShowEpisode(
-                            episode = it,
-                            expandedEpisodeId = expandedEpisodeId,
-                            mainActivityViewModel = mainActivityViewModel,
-                            scope = scope
-                        ) { str ->
-                            expandedEpisodeId = str
+                if (viewModel.episodes.items.isNotEmpty()) {
+                    items(viewModel.episodes.items) {
+                        if ((tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)) {
+                            ShowEpisode(
+                                episode = it,
+                                expandedEpisodeId = expandedEpisodeId,
+                                mainActivityViewModel = mainActivityViewModel,
+                                scope = scope
+                            ) { str ->
+                                expandedEpisodeId = str
+                            }
                         }
                     }
                 }

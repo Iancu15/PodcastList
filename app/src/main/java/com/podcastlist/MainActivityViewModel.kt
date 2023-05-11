@@ -20,6 +20,7 @@ class MainActivityViewModel @Inject constructor(
 ) : PodcastListViewModel() {
     var spotifyAppRemote = mutableStateOf<SpotifyAppRemote?>(null)
     var playerState = mutableStateOf<PlayerState?>(null)
+    var isInternetAvailable = mutableStateOf(true)
     fun isUserLoggedOut(): Boolean {
         return accountService.isUserLoggedOut()
     }
