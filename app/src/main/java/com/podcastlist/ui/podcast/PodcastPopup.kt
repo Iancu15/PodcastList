@@ -141,7 +141,15 @@ fun ShowEpisodes(
             ) {
                 if (viewModel.episodes.items.isNotEmpty()) {
                     items(viewModel.episodes.items) {
-                        if ((tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)) {
+                        var errorOccurred = false
+                        var isShown = false
+                        try {
+                            isShown = (tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)
+                        } catch (e: NullPointerException) {
+                            errorOccurred = true
+                        }
+
+                        if (isShown) {
                             ShowEpisode(
                                 episode = it,
                                 expandedEpisodeId = expandedEpisodeId,
@@ -150,6 +158,13 @@ fun ShowEpisodes(
                             ) { str ->
                                 expandedEpisodeId = str
                             }
+                        } else if (errorOccurred) {
+                            Text(
+                                text = "Couldn't load episode",
+                                modifier = Modifier.padding(10.dp),
+                                fontSize = 20.sp
+                            )
+                            Divider()
                         }
                     }
                 }

@@ -124,9 +124,9 @@ class DatabaseServiceImpl @Inject constructor(
             .get()
     }
 
-    override suspend fun setNumberOfEpisodesWatched(podcastId: String, numberOfEpisodesWatched: Int) {
+    override suspend fun setTotalNumberOfEpisodes(podcastId: String, numberOfEpisodes: Int) {
         val data = hashMapOf(
-            "numberOfEpisodesWatched" to numberOfEpisodesWatched
+            "numberOfEpisodes" to numberOfEpisodes
         )
 
         db.collection("users")
@@ -135,10 +135,10 @@ class DatabaseServiceImpl @Inject constructor(
             .document(podcastId)
             .set(data, SetOptions.merge())
             .addOnSuccessListener {
-                Log.d("DatabaseServiceImpl", "Updated no. eps. watched of $podcastId to $numberOfEpisodesWatched")
+                Log.d("DatabaseServiceImpl", "Updated no. of eps. of $podcastId to $numberOfEpisodes")
             }
             .addOnFailureListener {
-                Log.d("DatabaseServiceImpl", "Failed to update no. eps watched: $it")
+                Log.d("DatabaseServiceImpl", "Failed to update no. of eps. : $it")
             }
     }
 

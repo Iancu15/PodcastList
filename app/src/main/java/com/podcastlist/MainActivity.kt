@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.podcastlist.bcastreceiver.InternetStatusReceiver
+import com.podcastlist.service.NotificationService
 import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
@@ -55,6 +56,9 @@ class MainActivity : ComponentActivity() {
 
         val internetStatusReceiver = InternetStatusReceiver(viewModel)
         this.registerReceiver(internetStatusReceiver, IntentFilter())
+        Intent(this, NotificationService::class.java).also {
+            startService(it)
+        }
     }
 
     private fun requestAuthorization() {

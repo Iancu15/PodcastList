@@ -32,6 +32,7 @@
         <activity
             android:name="LoginActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <service android:name=".service.NotificationService" />
     </application>
 
 </manifest>
