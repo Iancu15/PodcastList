@@ -37,4 +37,6 @@
     <string name="search_label">Search</string>
     <string name="search_placeholder">search podcast</string>
     <string name="note_field_placeholder">Write a note for your timestamp</string>
+    <string name="channel_name">Podcast list notification</string>
+    <string name="channel_description">Used for providing notifications regarding new/removed episodes from the podcast list of the user</string>
 </resources>

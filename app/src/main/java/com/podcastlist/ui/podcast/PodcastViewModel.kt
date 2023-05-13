@@ -132,7 +132,8 @@ open class PodcastViewModel @Inject constructor(
             catchException {
                 databaseService.getPodcastDocument(podcastId)
                     .addOnSuccessListener { result ->
-                        val page = if (result.data == null) 0 else result.data?.get("page") as Long
+                        val page = if (result.data == null || result.data?.get("page") == null) 0
+                            else result.data?.get("page") as Long
                         episodesPageNumber.value = page.toInt()
                     }
                     .addOnFailureListener {

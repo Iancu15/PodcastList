@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private var spotifyAppRemote: SpotifyAppRemote? = null
     private val requestCodeValue = 1337
     private val viewModel: MainActivityViewModel by viewModels()
+    private lateinit var internetStatusReceiver: InternetStatusReceiver
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestAuthorization()
@@ -52,12 +53,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-
-        val internetStatusReceiver = InternetStatusReceiver(viewModel)
-        this.registerReceiver(internetStatusReceiver, IntentFilter())
-        Intent(this, NotificationService::class.java).also {
-            startService(it)
         }
     }
 
@@ -81,6 +76,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
+        internetStatusReceiver = InternetStatusReceiver(viewModel)
+        this.registerReceiver(internetStatusReceiver, IntentFilter())
+        Intent(this, NotificationService::class.java).also {
+            startService(it)
+        }
+
         val connectionParams = ConnectionParams.Builder(clientId)
             .setRedirectUri(redirectUri)
             .showAuthView(true)
@@ -102,22 +103,9 @@ class MainActivity : ComponentActivity() {
             }
         })
     }
-
-//    private fun connected() {
-//        spotifyAppRemote?.let {
-//            // Play a playlist
-//            val playlistURI = "spotify:playlist:37i9dQZF1DX2sUQwD7tbmL"
-//            it.playerApi.play(playlistURI)
-//            // Subscribe to PlayerState
-//            it.playerApi.subscribeToPlayerState().setEventCallback {
-//                val track: Track = it.track
-//                Log.d("MainActivity", track.name + " by " + track.artist.name)
-//            }
-//        }
-//    }
-
     override fun onStop() {
         super.onStop()
+        this.unregisterReceiver(internetStatusReceiver)
         spotifyAppRemote?.let {
             SpotifyAppRemote.disconnect(it)
         }
