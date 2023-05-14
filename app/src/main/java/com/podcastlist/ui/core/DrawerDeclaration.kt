@@ -44,8 +44,6 @@ fun Drawer(
     snackbarManager: SnackbarManager,
     currentScreen: Screen,
     cardsPerRow: Float,
-    isAppInDarkTheme: Boolean,
-    setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
     viewModel: MainActivityViewModel,
     modifyScreen: (Screen) -> Unit
@@ -119,9 +117,7 @@ fun Drawer(
             scope,
             navController,
             snackbarManager,
-            isAppInDarkTheme,
             cardsPerRow,
-            setColorTheme,
             setShowTopBar,
             modifyScreen,
             { newValue -> isUserLoggedOut = newValue },

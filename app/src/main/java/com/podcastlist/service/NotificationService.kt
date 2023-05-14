@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.podcastlist.MainActivity
+import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.api.SpotifyService
@@ -165,8 +166,6 @@ class NotificationService : Service() {
                             Log.d(TAG, "Failed to get mark status: $it")
                         }
                 }
-
-                Log.d(TAG, "Done checking updates")
             }
         }
 

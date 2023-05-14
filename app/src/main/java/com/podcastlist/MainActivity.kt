@@ -1,9 +1,11 @@
 package com.podcastlist
 
 import ScaffoldDeclaration
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
+import android.os.PowerManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,7 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.podcastlist.bcastreceiver.InternetStatusReceiver
+import com.podcastlist.bcastreceiver.PowerSaveModeReceiver
 import com.podcastlist.service.NotificationService
 import com.podcastlist.ui.theme.MyApplicationTheme
 import com.spotify.android.appremote.api.ConnectionParams
@@ -28,7 +30,7 @@ import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
 
-
+private const val TAG = "MainActivity"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val clientId = "fd24490669d84b619df5b235ba17e217"
@@ -36,21 +38,24 @@ class MainActivity : ComponentActivity() {
     private var spotifyAppRemote: SpotifyAppRemote? = null
     private val requestCodeValue = 1337
     private val viewModel: MainActivityViewModel by viewModels()
-    private lateinit var internetStatusReceiver: InternetStatusReceiver
+    private lateinit var powerSaveModeReceiver: PowerSaveModeReceiver
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestAuthorization()
         setContent {
-            val isSystemInDarkThemeValue = isSystemInDarkTheme()
-            var isAppInDarkTheme by rememberSaveable { mutableStateOf(isSystemInDarkThemeValue) }
+            var isAppInDarkTheme = isSystemInDarkTheme()
+            if (viewModel.isPowerSaveModeOn.value) {
+                isAppInDarkTheme = viewModel.darkThemePowerSave.value
+            } else if (!viewModel.useSystemLightTheme.value) {
+                isAppInDarkTheme = viewModel.darkTheme.value
+            }
+
             MyApplicationTheme(darkTheme = isAppInDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    ScaffoldDeclaration(isAppInDarkTheme, viewModel) {
-                        newValue -> isAppInDarkTheme = newValue
-                    }
+                    ScaffoldDeclaration(viewModel)
                 }
             }
         }
@@ -76,10 +81,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        internetStatusReceiver = InternetStatusReceiver(viewModel)
-        this.registerReceiver(internetStatusReceiver, IntentFilter())
-        Intent(this, NotificationService::class.java).also {
-            startService(it)
+        viewModel.fetchUserSettings()
+        val pm: PowerManager = this.getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (pm.isPowerSaveMode) {
+            Log.d(TAG, "Power save mode is on")
+            viewModel.isPowerSaveModeOn.value = true
+        } else {
+            Log.d(TAG, "Power save mode is off")
+            viewModel.isPowerSaveModeOn.value = false
+        }
+
+        if (!viewModel.isPowerSaveModeOn.value) {
+            Intent(this, NotificationService::class.java).also {
+                startService(it)
+            }
         }
 
         val connectionParams = ConnectionParams.Builder(clientId)
@@ -102,10 +117,15 @@ class MainActivity : ComponentActivity() {
                 // Something went wrong when attempting to connect! Handle errors here
             }
         })
+
+        powerSaveModeReceiver = PowerSaveModeReceiver(viewModel)
+        val filter = IntentFilter()
+        filter.addAction("android.os.action.POWER_SAVE_MODE_CHANGED")
+        registerReceiver(powerSaveModeReceiver, filter)
     }
     override fun onStop() {
         super.onStop()
-        this.unregisterReceiver(internetStatusReceiver)
+        this.unregisterReceiver(powerSaveModeReceiver)
         spotifyAppRemote?.let {
             SpotifyAppRemote.disconnect(it)
         }

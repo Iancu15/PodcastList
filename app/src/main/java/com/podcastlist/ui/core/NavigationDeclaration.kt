@@ -2,7 +2,6 @@ package com.podcastlist.ui.core
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,12 +10,11 @@ import com.podcastlist.R
 import com.podcastlist.Screen
 import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.screen.HomeScreen
-import com.podcastlist.ui.screen.SettingsScreen
 import com.podcastlist.ui.screen.edit_account.EditAccountScreen
 import com.podcastlist.ui.screen.login.LoginScreen
+import com.podcastlist.ui.screen.settings.SettingsScreen
 import com.podcastlist.ui.screen.signup.SignUpScreen
 import com.podcastlist.ui.screen.splash.SplashScreen
-import com.spotify.android.appremote.api.SpotifyAppRemote
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -24,9 +22,7 @@ fun NavHostDeclaration(
     scope: CoroutineScope,
     navController: NavHostController,
     snackbarManager: SnackbarManager,
-    isAppInDarkTheme: Boolean,
     cardsPerRow: Float,
-    setColorTheme: (Boolean) -> Unit,
     setShowTopBar: (Boolean) -> Unit,
     modifyScreen: (Screen) -> Unit,
     setIsUserLoggedOut: (Boolean) -> Unit,
@@ -67,7 +63,7 @@ fun NavHostDeclaration(
 
         composable(settingsPath) {
             modifyScreen(Screen.SETTINGS)
-            SettingsScreen(isAppInDarkTheme, setColorTheme)
+            SettingsScreen(viewModel)
         }
 
         composable(splashPath) {

@@ -37,9 +37,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ScaffoldDeclaration(
-    isAppInDarkTheme: Boolean,
     mainActivityViewModel: MainActivityViewModel,
-    setColorTheme: (Boolean) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -143,8 +141,6 @@ fun ScaffoldDeclaration(
                 snackbarManager,
                 currentScreen,
                 cardsPerRow,
-                isAppInDarkTheme,
-                setColorTheme,
                 { newValue -> showTopBar = newValue },
                 mainActivityViewModel
             ) { newScreen ->

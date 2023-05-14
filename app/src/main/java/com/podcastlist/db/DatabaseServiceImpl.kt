@@ -142,4 +142,46 @@ class DatabaseServiceImpl @Inject constructor(
             }
     }
 
+    override suspend fun getUserDocument(): Task<DocumentSnapshot> {
+        return db.collection("users")
+            .document(accountService.currentUserId)
+            .get()
+    }
+
+    private suspend fun modifyUserDocument(data: HashMap<String, Boolean>) {
+        db.collection("users")
+            .document(accountService.currentUserId)
+            .set(data, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("DatabaseServiceImpl", "Updated user setting")
+            }
+            .addOnFailureListener {
+                Log.d("DatabaseServiceImpl", "Failed to user setting")
+            }
+    }
+
+    override suspend fun setUseSystemLightThemeSetting(value: Boolean) {
+        val data = hashMapOf(
+            "useSystemLightTheme" to value
+        )
+
+        modifyUserDocument(data)
+    }
+
+    override suspend fun setDarkThemeSetting(value: Boolean) {
+        val data = hashMapOf(
+            "darkTheme" to value
+        )
+
+        modifyUserDocument(data)
+    }
+
+    override suspend fun setDarkThemePowerSaveSetting(value: Boolean) {
+        val data = hashMapOf(
+            "darkThemePowerSave" to value
+        )
+
+        modifyUserDocument(data)
+    }
+
 }

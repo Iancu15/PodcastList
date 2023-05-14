@@ -28,4 +28,12 @@ interface DatabaseService {
 
     suspend fun setTotalNumberOfEpisodes(podcastId: String, numberOfEpisodes: Int)
 
+    suspend fun getUserDocument(): Task<DocumentSnapshot>
+
+    suspend fun setUseSystemLightThemeSetting(value: Boolean)
+
+    suspend fun setDarkThemeSetting(value: Boolean)
+
+    suspend fun setDarkThemePowerSaveSetting(value: Boolean)
+
 }
