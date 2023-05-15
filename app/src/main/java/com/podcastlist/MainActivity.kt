@@ -14,11 +14,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Observer
 import com.podcastlist.bcastreceiver.PowerSaveModeReceiver
 import com.podcastlist.service.NotificationService
@@ -30,6 +28,7 @@ import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.datastore.preferences.core.Preferences
 
 private const val TAG = "MainActivity"
 @AndroidEntryPoint
@@ -39,6 +38,7 @@ class MainActivity : ComponentActivity() {
     private var spotifyAppRemote: SpotifyAppRemote? = null
     private val requestCodeValue = 1337
     private val viewModel: MainActivityViewModel by viewModels()
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "podcasts")
     private lateinit var powerSaveModeReceiver: PowerSaveModeReceiver
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

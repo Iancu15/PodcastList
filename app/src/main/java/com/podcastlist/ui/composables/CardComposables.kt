@@ -19,10 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.podcastlist.api.model.Podcast
+import com.podcastlist.ui.screen.home.HomeViewModel
 import kotlinx.coroutines.Job
 
 data class TopIconProperties(
@@ -32,10 +35,12 @@ data class TopIconProperties(
 )
 @Composable
 fun PodcastCard(
+    viewModel: HomeViewModel = hiltViewModel(),
     podcast: Podcast,
     modifier: Modifier,
     cardsPerRow: Int,
-    fetchSubtitleText: suspend ((String) -> Unit, Podcast) -> Unit,
+    subtitleContent: @Composable() (ColumnScope.(Podcast, TextUnit) -> Unit),
+    //fetchSubtitleText: suspend ((String) -> Unit, Podcast) -> Unit,
     topRightIconProperties: TopIconProperties,
     topLeftIconProperties: TopIconProperties,
     onImageClick: (Podcast) -> Unit
@@ -46,10 +51,10 @@ fun PodcastCard(
     val infoTransparency = 0.85f
     val infoHeight = 0.3f
     val cornerRoundness = 25.dp
-    var subtitleText by remember { mutableStateOf("") }
-    LaunchedEffect(key1 = true) {
-        fetchSubtitleText( { newValue -> subtitleText = newValue }, podcast )
-    }
+//    var subtitleText by remember { mutableStateOf("") }
+//    LaunchedEffect(key1 = true) {
+//        fetchSubtitleText( { newValue -> subtitleText = newValue }, podcast )
+//    }
 
     Card(
         modifier = modifier.padding(cardPadding),
@@ -118,14 +123,7 @@ fun PodcastCard(
                         style = MaterialTheme.typography.caption,
                         color = Color.White
                     )
-                    Text(
-                        text = subtitleText,
-                        fontSize = subtitleSize,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.subtitle1,
-                        color = Color.White
-                    )
+                    subtitleContent(this, podcast, subtitleSize)
                 }
             }
         }
@@ -137,8 +135,18 @@ fun PodcastCardList(
     layoutPadding: Dp,
     cardHeight: Dp,
     cardsPerRow: Int,
-    fetchSubtitleText: suspend ((String) -> Unit, Podcast) -> Unit = { callback: (String) -> Unit, podcast: Podcast ->
-        callback(podcast.publisher)
+//    fetchSubtitleText: suspend ((String) -> Unit, Podcast) -> Unit = { callback: (String) -> Unit, podcast: Podcast ->
+//        callback(podcast.publisher)
+//    },
+    subtitleContent: @Composable() (ColumnScope.(Podcast, TextUnit) -> Unit) = { podcast: Podcast, subtitleSize: TextUnit ->
+        Text(
+            text = podcast.publisher,
+            fontSize = subtitleSize,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.subtitle1,
+            color = Color.White
+        )
     },
     podcasts: List<Podcast>,
     onImageClick: (Podcast) -> Unit = {},
@@ -168,7 +176,7 @@ fun PodcastCardList(
                         topRightIconProperties = topRightIconProperties,
                         topLeftIconProperties = topLeftIconProperties,
                         onImageClick = onImageClick,
-                        fetchSubtitleText = fetchSubtitleText
+                        subtitleContent = subtitleContent
                     )
                 }
             }

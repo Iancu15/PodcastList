@@ -19,6 +19,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import com.podcastlist.MainActivityViewModel
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.ui.composables.BasicPopup
@@ -76,11 +79,21 @@ fun HomeScreen(
                 focusedPodcast = it
                 showPodcastPopup = true
             },
-            fetchSubtitleText = { callback: (String) -> Unit, podcast: Podcast ->
-                scope.launch {
-                    callback(viewModel.getNumberOfEpisodesWatchedAsync(podcast))
-                }
+            subtitleContent = { podcast: Podcast, subtitleSize: TextUnit ->
+                val numberOfEpisodesWatched = viewModel.getNumberOfEpisodesWatched(podcast.id).collectAsState(initial = 0).value.toString()
+                Text(
+                    text = "Watched $numberOfEpisodesWatched/${podcast.total_episodes}",
+                    fontSize = subtitleSize,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = Color.White
+                )
             },
+//            fetchSubtitleText = { callback: (String) -> Unit, podcast: Podcast ->
+//                val numberOfEpisodesWatched = viewModel.getNumberOfEpisodesWatched(podcast.id).collectAsState(initial = 0).toString()
+//                callback("Watched $numberOfEpisodesWatched/${podcast.total_episodes}")
+//            },
             topRightIconProperties = TopIconProperties(true, Icons.Default.PlayArrow) {
                 viewModel.markWatchedEpisode(it) { episode ->
                     scope.launch(Dispatchers.IO) {

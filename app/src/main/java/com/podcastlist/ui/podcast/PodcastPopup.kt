@@ -109,7 +109,8 @@ fun ShowEpisodes(
     var expandedEpisodeId by remember { mutableStateOf("") }
     var progress by remember { mutableStateOf(0f) }
     var tabState by remember { mutableStateOf(0) }
-    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.episodesPageNumber.value) {
+    var errorOccurred by remember { mutableStateOf(false) }
+    LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.episodesPageNumber.value, key3 = errorOccurred) {
         if (viewModel.doYouNeedToFetchEpisodes.value) {
             viewModel.snackbarManager = snackbarManager
             viewModel.currPodcastId.value = podcast.id
@@ -146,7 +147,6 @@ fun ShowEpisodes(
             ) {
                 if (viewModel.episodes.items.isNotEmpty()) {
                     items(viewModel.episodes.items) {
-                        var errorOccurred = false
                         var isShown = false
                         try {
                             isShown = (tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)
@@ -154,7 +154,7 @@ fun ShowEpisodes(
                             errorOccurred = true
                         }
 
-                        if (isShown) {
+                        if (isShown || (errorOccurred && tabState == 0)) {
                             ShowEpisode(
                                 episode = it,
                                 expandedEpisodeId = expandedEpisodeId,
@@ -163,13 +163,6 @@ fun ShowEpisodes(
                             ) { str ->
                                 expandedEpisodeId = str
                             }
-                        } else if (errorOccurred) {
-                            Text(
-                                text = "Couldn't load episode",
-                                modifier = Modifier.padding(10.dp),
-                                fontSize = 20.sp
-                            )
-                            Divider()
                         }
                     }
                 }
@@ -245,7 +238,7 @@ fun ShowEpisode(
         String.format("%02d:%02d", minutes, seconds)
     }
 
-    val wasPlayed = episode.resume_point.fully_played
+    val wasPlayed = if (episode.resume_point == null) false else episode.resume_point.fully_played
     val currentTrack = mainActivityViewModel.playerState.value!!.track
     val playbackPosition = mainActivityViewModel.playerState.value!!.playbackPosition
     val isCurrentlyPlaying = if (currentTrack == null) false else currentTrack.uri == episode.uri
@@ -261,7 +254,11 @@ fun ShowEpisode(
         else MaterialTheme.colors.primary
     val resumePoint =
         if (isCurrentlyPlaying) playbackPosition
-        else episode.resume_point.resume_position_ms
+        else {
+            if (episode.resume_point == null) 0
+            else
+            episode.resume_point.resume_position_ms
+        }
 
     val resumePointDuration = resumePoint.toDuration(DurationUnit.MILLISECONDS)
     val resumePointString = resumePointDuration.toComponents { minutes, seconds, _ ->
@@ -390,7 +387,10 @@ fun ShowEpisode(
                 )
             }
         }
-        if (isCurrentlyPlaying) {
+
+        if (episode.resume_point == null) {
+            Divider(color = MaterialTheme.colors.secondary)
+        } else if (isCurrentlyPlaying) {
             Divider(color = MaterialTheme.colors.primary)
         } else if (isEpisodeMarked) {
             Divider(color = MaterialTheme.colors.primaryVariant)

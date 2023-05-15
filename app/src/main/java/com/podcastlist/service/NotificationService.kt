@@ -9,22 +9,21 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import com.podcastlist.MainActivity
-import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.api.SpotifyService
-import com.podcastlist.api.model.PodcastImage
-import com.podcastlist.api.model.Podcasts
 import com.podcastlist.db.DatabaseService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import java.util.concurrent.locks.Lock
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 
@@ -77,7 +76,6 @@ class NotificationService : Service() {
         super.onCreate()
         createNotificationChannel()
     }
-
     private fun fetchPodcasts() {
         scope.launch {
             while (!authorizationService.isTokenAvailable) {
