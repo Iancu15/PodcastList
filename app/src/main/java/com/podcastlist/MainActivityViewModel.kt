@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.auth.AccountService
@@ -27,6 +28,7 @@ class MainActivityViewModel @Inject constructor(
     var playerState = mutableStateOf<PlayerState?>(null)
     var isInternetAvailable = mutableStateOf(true)
     var isPowerSaveModeOn = mutableStateOf(false)
+    var isPowerSaveModeOnLiveData = MutableLiveData<Boolean>()
     var useSystemLightTheme = mutableStateOf(true)
     var darkTheme = mutableStateOf(false)
     var darkThemePowerSave = mutableStateOf(true)

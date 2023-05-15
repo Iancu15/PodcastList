@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Observer
 import com.podcastlist.bcastreceiver.PowerSaveModeReceiver
 import com.podcastlist.service.NotificationService
 import com.podcastlist.ui.theme.MyApplicationTheme
@@ -79,6 +80,17 @@ class MainActivity : ComponentActivity() {
 
     }
 
+    fun startNotificationService() {
+        Intent(this, NotificationService::class.java).also {
+            startService(it)
+        }
+    }
+
+    fun stopNotificationService() {
+        Intent(this, NotificationService::class.java).also {
+            stopService(it)
+        }
+    }
     override fun onStart() {
         super.onStart()
         viewModel.fetchUserSettings()
@@ -92,10 +104,16 @@ class MainActivity : ComponentActivity() {
         }
 
         if (!viewModel.isPowerSaveModeOn.value) {
-            Intent(this, NotificationService::class.java).also {
-                startService(it)
-            }
+            startNotificationService()
         }
+
+        viewModel.isPowerSaveModeOnLiveData.observe(this, Observer {
+            if (it) {
+                stopNotificationService()
+            } else {
+                startNotificationService()
+            }
+        })
 
         val connectionParams = ConnectionParams.Builder(clientId)
             .setRedirectUri(redirectUri)
