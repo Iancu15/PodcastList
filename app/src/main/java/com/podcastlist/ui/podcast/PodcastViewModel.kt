@@ -39,6 +39,8 @@ open class PodcastViewModel @Inject constructor(
     var episodesPageNumber = mutableStateOf(0)
     var currPodcastId = mutableStateOf("")
     var lock = ReentrantLock()
+    var doYouNeedToFetchEpisodes = mutableStateOf(false)
+    var lastPodcastId = mutableStateOf("")
     fun onNoteChange(newValue: String) {
         note.value = newValue
     }
@@ -134,7 +136,15 @@ open class PodcastViewModel @Inject constructor(
                     .addOnSuccessListener { result ->
                         val page = if (result.data == null || result.data?.get("page") == null) 0
                             else result.data?.get("page") as Long
-                        episodesPageNumber.value = page.toInt()
+                        val pageInt = page.toInt()
+                        if (pageInt == episodesPageNumber.value && podcastId == lastPodcastId.value) {
+                            doYouNeedToFetchEpisodes.value = false
+                        } else {
+                            episodesPageNumber.value = pageInt
+                            doYouNeedToFetchEpisodes.value = true
+                        }
+
+                        lastPodcastId.value = podcastId
                     }
                     .addOnFailureListener {
                         Log.d("DatabaseServiceImpl", "Failed to get mark status: $it")

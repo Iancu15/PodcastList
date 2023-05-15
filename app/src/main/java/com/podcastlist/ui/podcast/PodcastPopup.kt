@@ -110,10 +110,12 @@ fun ShowEpisodes(
     var progress by remember { mutableStateOf(0f) }
     var tabState by remember { mutableStateOf(0) }
     LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.episodesPageNumber.value) {
-        viewModel.snackbarManager = snackbarManager
-        viewModel.currPodcastId.value = podcast.id
-        viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
-        progress = 1.0f
+        if (viewModel.doYouNeedToFetchEpisodes.value) {
+            viewModel.snackbarManager = snackbarManager
+            viewModel.currPodcastId.value = podcast.id
+            viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
+            progress = 1.0f
+        }
     }
 
     LaunchedEffect(key1 = viewModel.currPodcastId.value) {
@@ -121,7 +123,10 @@ fun ShowEpisodes(
         viewModel.fetchEpisodesPageNumber(podcast.id)
     }
 
-    ProgressLine(progress = progress)
+    if (viewModel.doYouNeedToFetchEpisodes.value) {
+        ProgressLine(progress = progress)
+    }
+
     viewModel.lazyListState = rememberLazyListState()
     Column {
         PodcastListTabs(
@@ -175,6 +180,7 @@ fun ShowEpisodes(
                 state = viewModel.episodesPageNumber.value,
                 modifyState = { newValue ->
                     viewModel.episodesPageNumber.value = newValue
+                    viewModel.doYouNeedToFetchEpisodes.value = true
                     viewModel.setEpisodePageNumber(podcast.id, viewModel.episodesPageNumber.value)
                 }
             )
