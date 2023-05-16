@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.gson.JsonSyntaxException
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.api.SpotifyService
 import com.podcastlist.api.model.EpisodesQuery
@@ -14,10 +16,14 @@ import com.podcastlist.api.model.Podcast
 import com.podcastlist.api.model.Podcasts
 import com.podcastlist.db.DatabaseService
 import com.podcastlist.db.model.TimestampNote
+import com.podcastlist.storage.PersistentStorage
+import com.podcastlist.storage.model.EpisodesList
 import com.podcastlist.ui.AuthorizationViewModel
 import com.podcastlist.ui.screen.edit_account.EditAccountUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -27,7 +33,8 @@ import javax.inject.Inject
 open class PodcastViewModel @Inject constructor(
     private val authorizationService: AuthorizationService,
     private val spotifyService: SpotifyService,
-    private val databaseService: DatabaseService
+    private val databaseService: DatabaseService,
+    private val persistentStorage: PersistentStorage
 ) : AuthorizationViewModel(authorizationService) {
     var episodes: EpisodesQuery by mutableStateOf(EpisodesQuery())
     var lazyListState: LazyListState by mutableStateOf(LazyListState())
@@ -48,7 +55,7 @@ open class PodcastViewModel @Inject constructor(
     fun onEditNoteChange(newValue: String) {
         editNote.value = newValue
     }
-    private fun fetchEpisodesOfPodcast(podcast: Podcast) {
+    fun fetchEpisodesOfPodcast(pageNumber: Int, podcast: Podcast) {
         viewModelScope.launch(Dispatchers.IO) {
             catchException {
                 val offset = episodesPageNumber.value * 50
@@ -59,16 +66,17 @@ open class PodcastViewModel @Inject constructor(
                 )
 
                 episodes.items = episodes.items.sortedBy { it.release_date }
+                persistentStorage.add(EpisodesList(pageNumber, podcast.id, episodes.items))
                 Log.d("HomeViewModel", "Got ${episodes.items.size} episodes for ${podcast.name}")
             }
         }
     }
 
-    fun fetchEpisodesOfPodcastWithSnackbar(podcast: Podcast) {
-        callFunctionOrShowRetry("Your list of podcasts couldn't be retrieved") {
-            fetchEpisodesOfPodcast(podcast = podcast)
-        }
-    }
+//    fun fetchEpisodesOfPodcastWithSnackbar(podcast: Podcast) {
+//        callFunctionOrShowRetry("Your list of podcasts couldn't be retrieved") {
+//            fetchEpisodesOfPodcast(podcast = podcast)
+//        }
+//    }
 
     fun storeOrEditTimestampNote(timestamp: String, note: String, trackUri: String) {
         viewModelScope.launch {
@@ -157,6 +165,17 @@ open class PodcastViewModel @Inject constructor(
         viewModelScope.launch {
             catchException {
                 databaseService.setCurrentEpisodesPage(podcastId, page)
+            }
+        }
+    }
+
+    fun getEpisodesList(podcast: Podcast, pageNumber: Int): Flow<EpisodesList> {
+        val numberOfPages = (podcast.total_episodes / 50) + 1
+        return if (pageNumber < numberOfPages) {
+            persistentStorage.get(podcast.id, pageNumber)
+        } else {
+            flow {
+                EpisodesList(pageNumber, podcast.id, arrayListOf())
             }
         }
     }

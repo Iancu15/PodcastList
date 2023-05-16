@@ -6,6 +6,8 @@ import com.podcastlist.auth.AccountService
 import com.podcastlist.auth.AccountServiceImpl
 import com.podcastlist.db.DatabaseService
 import com.podcastlist.db.DatabaseServiceImpl
+import com.podcastlist.storage.PersistentStorage
+import com.podcastlist.storage.Storage
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,4 +24,7 @@ abstract class ServiceModule {
 
     @Binds
     abstract fun provideDatabaseService(impl: DatabaseServiceImpl): DatabaseService
+
+    @Binds
+    abstract fun provideStorage(impl: PersistentStorage): Storage
 }

@@ -26,6 +26,7 @@ import com.podcastlist.MainActivityViewModel
 import com.podcastlist.R
 import com.podcastlist.api.model.PodcastEpisode
 import com.podcastlist.api.model.Podcast
+import com.podcastlist.storage.model.EpisodesList
 import com.podcastlist.ui.core.ProgressLine
 import com.podcastlist.ui.snackbar.SnackbarManager
 import com.podcastlist.ui.subscribe.SubscribeTabs
@@ -107,15 +108,15 @@ fun ShowEpisodes(
     mainActivityViewModel: MainActivityViewModel
 ) {
     var expandedEpisodeId by remember { mutableStateOf("") }
-    var progress by remember { mutableStateOf(0f) }
+    //var progress by remember { mutableStateOf(0f) }
     var tabState by remember { mutableStateOf(0) }
     var errorOccurred by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = viewModel.episodes.items.isNotEmpty(), key2 = viewModel.episodesPageNumber.value, key3 = errorOccurred) {
         if (viewModel.doYouNeedToFetchEpisodes.value) {
             viewModel.snackbarManager = snackbarManager
             viewModel.currPodcastId.value = podcast.id
-            viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
-            progress = 1.0f
+//            viewModel.fetchEpisodesOfPodcastWithSnackbar(podcast)
+//            progress = 1.0f
         }
     }
 
@@ -124,9 +125,17 @@ fun ShowEpisodes(
         viewModel.fetchEpisodesPageNumber(podcast.id)
     }
 
-    if (viewModel.doYouNeedToFetchEpisodes.value) {
-        ProgressLine(progress = progress)
+    LaunchedEffect(key1 = errorOccurred) {
+        if (errorOccurred) {
+            viewModel.fetchEpisodesOfPodcast(viewModel.episodesPageNumber.value, podcast)
+        }
     }
+
+//    if (viewModel.doYouNeedToFetchEpisodes.value) {
+//        ProgressLine(progress = progress)
+//    }
+    val episodes = viewModel.getEpisodesList(podcast, viewModel.episodesPageNumber.value)
+        .collectAsState(initial = EpisodesList(viewModel.episodesPageNumber.value, podcast.id, arrayListOf()))
 
     viewModel.lazyListState = rememberLazyListState()
     Column {
@@ -145,16 +154,19 @@ fun ShowEpisodes(
                     .weight(1f),
                 state = viewModel.lazyListState
             ) {
-                if (viewModel.episodes.items.isNotEmpty()) {
-                    items(viewModel.episodes.items) {
+                //if (viewModel.episodes.items.isNotEmpty()) {
+                if (episodes.value.episodes.isNotEmpty())
+                    //items(viewModel.episodes.items) {
+                    items(episodes.value.episodes) {
                         var isShown = false
                         try {
-                            isShown = (tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)
+                            isShown =
+                                (tabState == 0 && !it.resume_point.fully_played) || (tabState == 1 && it.resume_point.fully_played)
                         } catch (e: NullPointerException) {
                             errorOccurred = true
                         }
 
-                        if (isShown || (errorOccurred && tabState == 0)) {
+                        if (isShown || (errorOccurred && tabState == 0 && it.resume_point == null)) {
                             ShowEpisode(
                                 episode = it,
                                 expandedEpisodeId = expandedEpisodeId,
@@ -164,8 +176,9 @@ fun ShowEpisodes(
                                 expandedEpisodeId = str
                             }
                         }
+                        //}
                     }
-                }
+                //}
             }
 
             EpisodesPageTabs(
@@ -256,8 +269,7 @@ fun ShowEpisode(
         if (isCurrentlyPlaying) playbackPosition
         else {
             if (episode.resume_point == null) 0
-            else
-            episode.resume_point.resume_position_ms
+            else episode.resume_point.resume_position_ms
         }
 
     val resumePointDuration = resumePoint.toDuration(DurationUnit.MILLISECONDS)

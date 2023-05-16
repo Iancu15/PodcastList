@@ -12,11 +12,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.podcastlist.api.AuthorizationService
 import com.podcastlist.api.SpotifyService
+import com.podcastlist.api.model.EpisodesQuery
 import com.podcastlist.api.model.Podcast
 import com.podcastlist.api.model.PodcastEpisode
 import com.podcastlist.api.model.Podcasts
 import com.podcastlist.db.DatabaseService
 import com.podcastlist.service.ServicePodcast
+import com.podcastlist.storage.PersistentStorage
+import com.podcastlist.storage.model.EpisodesList
 import com.podcastlist.ui.AuthorizationViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +36,8 @@ class HomeViewModel @Inject constructor(
     private val spotifyService: SpotifyService,
     private val authorizationService: AuthorizationService,
     private val databaseService: DatabaseService,
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val persistentStorage: PersistentStorage
 ) : AuthorizationViewModel(authorizationService) {
     var subscribedPodcasts: Podcasts by mutableStateOf(Podcasts())
     var arePodcastsStoredInStorage: Boolean by mutableStateOf(false)
@@ -131,6 +135,11 @@ class HomeViewModel @Inject constructor(
                 podcastId = podcast.id,
                 offset = page * 50
             )
+
+            if (episodes.items.isNotEmpty() && episodes.items[0].resume_point != null) {
+                episodes.items = episodes.items.sortedBy { it.release_date }
+                persistentStorage.add(EpisodesList(page, podcast.id, episodes.items))
+            }
 
             val numberOfEpisodesWatched = try {
                 episodes.items.map { it.resume_point.fully_played }.filter { it }.size
