@@ -4,12 +4,14 @@ import ScaffoldDeclaration
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
@@ -80,17 +82,19 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    fun startNotificationService() {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun startNotificationService() {
         Intent(this, NotificationService::class.java).also {
-            startService(it)
+            startForegroundService(it)
         }
     }
 
-    fun stopNotificationService() {
+    private fun stopNotificationService() {
         Intent(this, NotificationService::class.java).also {
             stopService(it)
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStart() {
         super.onStart()
         viewModel.fetchUserSettings()
@@ -107,13 +111,13 @@ class MainActivity : ComponentActivity() {
             startNotificationService()
         }
 
-        viewModel.isPowerSaveModeOnLiveData.observe(this, Observer {
+        viewModel.isPowerSaveModeOnLiveData.observe(this) {
             if (it) {
                 stopNotificationService()
             } else {
                 startNotificationService()
             }
-        })
+        }
 
         val connectionParams = ConnectionParams.Builder(clientId)
             .setRedirectUri(redirectUri)

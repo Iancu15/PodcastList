@@ -148,7 +148,7 @@ class DatabaseServiceImpl @Inject constructor(
             .get()
     }
 
-    private suspend fun modifyUserDocument(data: HashMap<String, Boolean>) {
+    private fun modifyUserDocument(data: HashMap<String, Boolean>) {
         db.collection("users")
             .document(accountService.currentUserId)
             .set(data, SetOptions.merge())

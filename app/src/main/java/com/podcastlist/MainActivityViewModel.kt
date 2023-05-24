@@ -15,6 +15,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.types.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -55,24 +56,31 @@ class MainActivityViewModel @Inject constructor(
         Log.d("MainActivityViewModel", "Token: ${authorizationService.authorizationToken}")
     }
 
+    private suspend fun fetchUserSettingsAsync() {
+        databaseService.getUserDocument()
+            .addOnSuccessListener { result ->
+                useSystemLightTheme.value =
+                    if (result.data == null || result.data?.get("useSystemLightTheme") == null) true
+                    else result.data?.get("useSystemLightTheme") as Boolean
+                darkTheme.value =
+                    if (result.data == null || result.data?.get("darkTheme") == null) false
+                    else result.data?.get("darkTheme") as Boolean
+                darkThemePowerSave.value =
+                    if (result.data == null || result.data?.get("darkThemePowerSave") == null) true
+                    else result.data?.get("darkThemePowerSave") as Boolean
+            }
+            .addOnFailureListener {
+                Log.d("DatabaseServiceImpl", "Failed to get user settings: $it")
+            }
+    }
     fun fetchUserSettings() {
         viewModelScope.launch(Dispatchers.IO) {
-            catchException {
-                databaseService.getUserDocument()
-                    .addOnSuccessListener { result ->
-                        useSystemLightTheme.value =
-                            if (result.data == null || result.data?.get("useSystemLightTheme") == null) true
-                            else result.data?.get("useSystemLightTheme") as Boolean
-                        darkTheme.value =
-                            if (result.data == null || result.data?.get("darkTheme") == null) false
-                            else result.data?.get("darkTheme") as Boolean
-                        darkThemePowerSave.value =
-                            if (result.data == null || result.data?.get("darkThemePowerSave") == null) true
-                            else result.data?.get("darkThemePowerSave") as Boolean
-                    }
-                    .addOnFailureListener {
-                        Log.d("DatabaseServiceImpl", "Failed to get mark status: $it")
-                    }
+            try {
+                fetchUserSettingsAsync()
+            } catch (e: java.lang.IllegalArgumentException) {
+                Log.d("DatabaseServiceImpl", "Failed to get user settings - IllegalArgumentException")
+                delay(10000)
+                fetchUserSettingsAsync()
             }
         }
     }

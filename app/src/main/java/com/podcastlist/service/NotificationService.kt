@@ -1,9 +1,6 @@
 package com.podcastlist.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -11,10 +8,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import com.podcastlist.MainActivity
 import com.podcastlist.R
 import com.podcastlist.api.AuthorizationService
@@ -22,8 +15,6 @@ import com.podcastlist.api.SpotifyService
 import com.podcastlist.db.DatabaseService
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 
@@ -35,6 +26,7 @@ data class ServicePodcast (
 
 private const val TAG = "NotificationService"
 private const val CHANNEL_ID = "podcast_list"
+private const val CHANNEL_ID_START = "podcast_list_start"
 
 @AndroidEntryPoint
 class NotificationService : Service() {
@@ -72,8 +64,25 @@ class NotificationService : Service() {
         }
     }
 
+    private fun startForegroundCall() {
+        if (Build.VERSION.SDK_INT >= 26) {
+            val channel = NotificationChannel(
+                CHANNEL_ID_START,
+                "Channel human readable title",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+                channel
+            )
+            val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID_START)
+                .setContentTitle("")
+                .setContentText("").build()
+            startForeground(1, notification)
+        }
+    }
     override fun onCreate() {
         super.onCreate()
+        startForegroundCall()
         createNotificationChannel()
     }
     private fun fetchPodcasts() {
@@ -136,7 +145,8 @@ class NotificationService : Service() {
                 for (podcast in podcasts) {
                     databaseService.getPodcastDocument(podcast.id)
                         .addOnSuccessListener { result ->
-                            val numberOfEpisodesLong = if (result.data == null) 0
+                            val numberOfEpisodesLong =
+                                if (result.data == null || result.data?.get("numberOfEpisodes") == null) 0
                                 else result.data?.get("numberOfEpisodes") as Long
                             val numberOfEpisodes = numberOfEpisodesLong.toInt()
                             Log.d(TAG, "${podcast.name}: ${podcast.total_episodes} episodes available, $numberOfEpisodes episodes tracked in database")
